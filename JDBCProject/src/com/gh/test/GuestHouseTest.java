@@ -14,13 +14,15 @@ import com.gh.vo.Customer;
 import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
 
-
 public class GuestHouseTest implements Runnable {
 	static CustomerDAOImpl cdao = CustomerDAOImpl.getInstance();
 	static GuestHouseDAOImpl gdao = GuestHouseDAOImpl.getInstance();
     static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
+//    	GuestHouseTest test = new GuestHouseTest();
+//		Thread t = new Thread(test);
+//		t.start();
         while (true) {
             System.out.println("\n=== 게스트하우스 예약 시스템 ===");
             System.out.println("1. 고객으로 접속");
@@ -374,7 +376,7 @@ public class GuestHouseTest implements Runnable {
                         System.out.print("날짜 입력 (yyyy-MM-dd): ");
                         String date = scanner.nextLine();
 
-                        String remain = cdao.getRemainingCapacity(gusNum, java.sql.Date.valueOf(date));
+                        int remain = cdao.getRemainingCapacity(gusNum, java.sql.Date.valueOf(date));
                         System.out.println("남은 인원/총 정원: " + remain);
                     }
 
@@ -579,7 +581,7 @@ public class GuestHouseTest implements Runnable {
     	while (true) {
     		try {
     			List<Customer> customers = gdao.getAllCustomers();
-    			System.out.println("\n[5초마다 최신 예약 현황 출력]");
+    			System.out.println("\n[60초마다 최신 예약 현황 출력]");
     			for (Customer c : customers) {
     				List<Reservation> resList = cdao.getReservation(c.getNum());
     				if (!resList.isEmpty()) {
@@ -590,27 +592,12 @@ public class GuestHouseTest implements Runnable {
     				}
     			}
 
-    			Thread.sleep(5000); // 5초마다 반복
+    			Thread.sleep(60000); // 60초마다 반복
 
     		} catch (Exception e) {
     			System.out.println("❌ 예약 갱신 오류: " + e.getMessage());
     		}
     	}
     }
-
     
-//	@Override
-//	public void run() {
-//		while (true) {// 무한 루핑을 돌면서 작업을 하도록...
-//			
-//			// 쓰레드가 작업하는 코드를 작성....실시간으로 예약테이블의 정보를 가져와서
-//			try {
-//				
-//				Thread.sleep(5000); //5초 마다
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-//
-//	}
 }
