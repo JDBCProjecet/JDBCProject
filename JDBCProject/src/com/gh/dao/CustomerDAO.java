@@ -3,6 +3,7 @@ package com.gh.dao;
 import java.time.LocalDate;
 
 import java.util.List;
+import java.util.Map;
 
 import com.gh.exception.DMLException;
 import com.gh.exception.DuplicateException;
@@ -34,7 +35,7 @@ public interface CustomerDAO {
 	public List<Reservation> getReservation(int customerId)throws RecordNotFoundException, DMLException;
 
 	// 8. 게스트하우스 지역별 조회
-	public List<GuestHouse> getGuestHousesByRegion(String Region)throws RecordNotFoundException, DMLException;
+	public Map<String, List<Reservation>> getRegionGHReservation() throws RecordNotFoundException, DMLException;
 
 	// 9. 회원 등급 확인 및 할인 적용
 	public int getDiscountedPrice(int customerId) throws DMLException;
