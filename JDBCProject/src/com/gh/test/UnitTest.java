@@ -39,7 +39,7 @@ public class UnitTest implements Runnable {
 //			gdao.updateGuestHouse(new GuestHouse(1,"파티","게하2","서울시 강남구 논현동",100000,10));
 //			gdao.deleteGuestHouse(1);
 			// (int num, int gusNum, int cusNum, LocalDate checkInDate, LocalDate checkOutDate, int totalPrice,	int totalPeople)
-			cdao.addReservation(new Reservation(13, 2, 1, LocalDate.of(2025, 7, 10), LocalDate.of(2025, 7, 15), 0, 50));
+			//cdao.addReservation(new Reservation(6, 1, 1, LocalDate.of(2025, 8, 1), LocalDate.of(2025, 8, 10), 0, 6));
 //			gdao.registerGuestHouse(new GuestHouse(11,"게하4","서울시 강남구 논현동",100000,5,"파티"));
 //			gdao.updateGuestHouse(new GuestHouse(11,"게하10","서울시 강남구 논현동",100000,10,"파티"));
 //			gdao.deleteGuestHouse(9);
@@ -48,7 +48,7 @@ public class UnitTest implements Runnable {
 //			cdao.cancelReservation(1);
 //			cdao.getReservation(1).stream().forEach(System.out::println);
 //			cdao.getAllGuestHouses().stream().forEach(System.out::println);
-			System.out.println("남은 인원 수: " + cdao.getRemainingCapacity(1, Date.valueOf("2025-06-10")));
+			System.out.println("남은 인원 수: " + cdao.getRemainingCapacity(1, Date.valueOf("2025-08-05")));
 
 //			cdao.getGuestHouses("조식").stream().forEach(System.out::println);
 
