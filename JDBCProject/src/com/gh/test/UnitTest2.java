@@ -40,6 +40,7 @@ public class UnitTest2 implements Runnable {
 //		private int totalPeople;// res_tpeople
 		
 		try {
+			//CustomerDAOImpl
 //		1.registerCustomer() 성공
 //			cdao.registerCustomer(new Customer(11,"강민기","경기 안산시","920906",'M',"010-5711-1106","VIP"));
 //		2.updateCustomer() 성공
@@ -53,8 +54,23 @@ public class UnitTest2 implements Runnable {
 //			cdao.cancelReservation(51);
 //		7.getReservation() 성공
 //			cdao.getReservation(1).stream().forEach(System.out::println);
-//		8.getRegionGHReservation()
-			System.out.println(cdao.getRegionGHReservation());
+//		8.getRegionGHReservation() 성공
+//			System.out.println(cdao.getRegionGHReservation());
+//		9.getDiscountedPrice() 적용완료
+//		10.getAllGuestHouses() 성공
+//			cdao.getAllGuestHouses().stream().forEach(System.out::println);
+//		11.getRemainingCapacity() 수정중
+//		12.getGuestHouses() 성공
+//			cdao.getGuestHouses("파티").stream().forEach(System.out::println);
+//		13.calculatePriceByDay() 적용완료
+//		14.getRegionGuestHouse() 성공
+//			cdao.getRegionGuestHouse("제주").stream().forEach(System.out::println);
+			
+			//GuestHouseDAOImpl
+//		1.getTotalSalesPerGuestHouse()
+//			System.out.println(gdao.getTotalSalesPerGuestHouse());
+			
+		
 			
 		}catch(Exception e) {
 			e.printStackTrace();
