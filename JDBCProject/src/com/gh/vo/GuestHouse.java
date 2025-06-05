@@ -13,7 +13,12 @@ public class GuestHouse {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public GuestHouse(int num, String serviceName, String name, String address, int price, int capacity) {
+	public GuestHouse(String name, int price) {
+		super();
+		this.name = name;
+		this.price = price;
+	}
+	public GuestHouse(int num, String name, String address, int price, int capacity) {
 		super();
 		this.num = num;
 		this.name = name;
@@ -53,7 +58,7 @@ public class GuestHouse {
 	}
 	@Override
 	public String toString() {
-		return "GuestHouse [num=" + num + ", serviceName="  + ", name=" + name + ", address=" + address
+		return "GuestHouse [num=" + num  + ", name=" + name + ", address=" + address
 				+ ", price=" + price + ", capacity=" + capacity + "]";
 	}
 	

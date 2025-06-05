@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -169,21 +171,93 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 	// 날짜별 총 이용객 수 확인
 	@Override
 	public Map<String, Integer> getUsageStatsByDate() throws RecordNotFoundException, DMLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Map<String, Integer> customersByDay = new LinkedHashMap<>();
 		
-		return null;
+		try {
+			conn = getConnect();
+			String sql =
+					"""
+					SELECT res_cindate, SUM(res_tpeople) AS total_people 
+					FROM reservation 
+					GROUP BY res_cindate 
+					ORDER BY res_cindate
+					""";
+			ps=conn.prepareStatement(sql);
+			rs=ps.executeQuery();
+			while (rs.next()) {
+			    String day = rs.getString("res_cindate");
+			    int totalPeople = rs.getInt("total_people");
+			    customersByDay.put(day, totalPeople);
+			    
+			}
+		}catch(SQLException e){
+			throw new DMLException("잘못된 쿼리문입니다.");
+		}finally {
+			closeAll(rs, ps, conn);
+		}
+		return customersByDay;
 	}
 	
 	//날짜별 총 매출 확인
 	@Override
 	public Map<String, Integer> getSalesStatsByDate() throws RecordNotFoundException, DMLException {
-		// TODO Auto-generated method stub
-		return null;
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Map<String, Integer> salesByDay = new LinkedHashMap<>();
+		
+		try {
+			conn = getConnect();
+			String sql = "res_cindate, SUM(res_tprice) AS total_price FROM reservation GROUP BY res_cindate ORDER BY 1";
+			ps=conn.prepareStatement(sql);
+			rs=ps.executeQuery();
+			while (rs.next()) {
+			    String day = rs.getString("ymd");
+			    int totalPeople = rs.getInt("total_price");
+			    salesByDay.put(day, totalPeople);
+			}
+		}catch(SQLException e){
+			throw new DMLException("잘못된 쿼리문입니다.");
+		}finally {
+			closeAll(rs, ps, conn);
+		}
+		return salesByDay;
 	}
 	
 	//매출 기준 Top 5 게스트하우스 조회
 	@Override
-	public List<GuestHouseDAO> getTop5GHByRevenue() throws RecordNotFoundException, DMLException {
-		return null;
+	public Map<String, GuestHouse> getTop5GHByRevenue() throws RecordNotFoundException, DMLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		 Map<String, GuestHouse> ghRank = new LinkedHashMap<>();
+		try {
+			conn = getConnect();
+			String sql = """
+				    SELECT gus_num, gus_name, total_price, 
+			           RANK() OVER (ORDER BY total_price DESC) AS ranking
+			    FROM (
+			        SELECT gus_num, g.gus_name, SUM(r.res_tprice) AS total_price
+			        FROM reservation r
+			        JOIN guesthouse g USING(gus_num)
+			        GROUP BY g.gus_num, g.gus_name
+			    ) AS ranked
+			    """;
+			ps=conn.prepareStatement(sql);
+			rs=ps.executeQuery();
+			while (rs.next()) {
+				ghRank.put(rs.getString("ranking"),new GuestHouse(rs.getString("gus_name"),rs.getInt("total_price")));
+			  
+			}
+		}catch(SQLException e){
+			throw new DMLException("잘못된 쿼리문입니다.");
+		}finally {
+			closeAll(rs, ps, conn);
+		}
+		return ghRank;
 	}
 
 	@Override
