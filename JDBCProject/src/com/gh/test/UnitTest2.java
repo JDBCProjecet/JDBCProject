@@ -1,11 +1,10 @@
 package com.gh.test;
 
-import java.time.LocalDate;
+import java.util.Map;
 import java.util.Scanner;
 
 import com.gh.dao.impl.CustomerDAOImpl;
 import com.gh.dao.impl.GuestHouseDAOImpl;
-import com.gh.vo.Reservation;
 
 
 public class UnitTest2 implements Runnable {
@@ -60,6 +59,7 @@ public class UnitTest2 implements Runnable {
 //		10.getAllGuestHouses() 성공
 //			cdao.getAllGuestHouses().stream().forEach(System.out::println);
 //		11.getRemainingCapacity() 수정중
+//			System.out.println(cdao.getRemainingCapacity(11, Date.valueOf(LocalDate.of(2025, 6, 8))));
 //		12.getGuestHouses() 성공
 //			cdao.getGuestHouses("파티").stream().forEach(System.out::println);
 //		13.calculatePriceByDay() 적용완료
@@ -68,8 +68,11 @@ public class UnitTest2 implements Runnable {
 			
 			//GuestHouseDAOImpl
 //		1.getTotalSalesPerGuestHouse()
-//			System.out.println(gdao.getTotalSalesPerGuestHouse());
-			
+//		Map<String, Integer> result = gdao.getTotalSalesPerGuestHouse();
+//		    for (Map.Entry<String, Integer> entry : result.entrySet()) {
+//		        System.out.println("게스트하우스: " + entry.getKey() + ", 매출등급: " + entry.getValue());
+//		    }
+//		2.
 		
 			
 		}catch(Exception e) {
