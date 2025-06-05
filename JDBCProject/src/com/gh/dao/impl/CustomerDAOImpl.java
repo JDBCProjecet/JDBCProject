@@ -23,27 +23,42 @@ import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
 
 import config.ServerInfo;
-
+/**
+ * CustomerDAOImpl: 고객 및 예약 관련 DAO 구현체
+ * 데이터베이스 연동을 통해 회원가입, 예약, 수정, 삭제 등의 기능을 수행합니다.
+ */
 public class CustomerDAOImpl implements CustomerDAO{
-	// 싱글톤
+	
 	private static CustomerDAOImpl dao = new CustomerDAOImpl();
 	
 	public CustomerDAOImpl() {
 		System.out.println("Singletone Creating...");
 	}
-	
+	/**
+     * 싱글톤 인스턴스 반환
+     * @return CustomerDAOImpl 객체
+     */	
 	public static CustomerDAOImpl getInstance() {
 		return dao;
 	}
 
-	// 공통 로직
+	 /**
+     * DB 연결을 생성합니다.
+     * @return Connection 객체
+     * @throws SQLException DB 연결 실패 시
+     */
 	private Connection getConnect() throws SQLException {
 		Connection conn = DriverManager.getConnection(ServerInfo.URL, ServerInfo.USER, ServerInfo.PASS);
 		System.out.println("-----DataBase Connecting-----");
 		return conn;
 	}
 	
-
+	 /**
+     * 자원 해제
+     * @param ps PreparedStatement
+     * @param conn Connection
+     * @throws DMLException 해제 실패 시
+     */
 	private void closeAll(PreparedStatement ps, Connection conn) throws DMLException {
 		try {
 			if(ps != null) ps.close();
@@ -54,7 +69,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 	}
 
 
-
+	 /**
+     * 자원 해제 (ResultSet 포함)
+     * @param rs ResultSet
+     * @param ps PreparedStatement
+     * @param conn Connection
+     * @throws DMLException 해제 실패 시
+     */
 	private void closeAll(ResultSet rs, PreparedStatement ps, Connection conn) throws DMLException {
 		try {
 			if(rs != null) rs.close();
@@ -64,7 +85,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 		}
 	}
 	
-
+	 /**
+     * 고객 번호로 존재 여부 확인
+     * @param num 고객 번호
+     * @param conn DB 연결
+     * @return 존재 시 true
+     * @throws SQLException SQL 실행 오류
+     */
 	public boolean isExist(int num, Connection conn) throws SQLException{
 		String query = "SELECT cus_num FROM customer WHERE cus_num=?";
 		PreparedStatement ps=conn.prepareStatement(query);
@@ -73,7 +100,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 		
 		return rs.next();//ssn이 있으면 true |없으면 false
 	}
-	
+	  /**
+     * 예약 번호로 존재 여부 확인
+     * @param resId 예약 번호
+     * @param conn DB 연결
+     * @return 존재 시 true
+     * @throws SQLException SQL 실행 오류
+     */
 	public boolean isResExist(int resId, Connection conn) throws SQLException{
 		String query = "SELECT res_num FROM reservation WHERE res_num=?";
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -86,7 +119,15 @@ public class CustomerDAOImpl implements CustomerDAO{
 
 	}
 	
-	/// 숙박기간동안 총 가격 구하는 함수
+	 /**
+     * 숙박 기간 동안 총 가격 계산
+     * @param guestHouseNum 게스트하우스 번호
+     * @param checkInDate 체크인 날짜
+     * @param checkOutDate 체크아웃 날짜
+     * @return 총 요금
+     * @throws RecordNotFoundException 가격 정보 없음
+     * @throws DMLException DB 오류
+     */
 	private int totalPrice(int guestHouseNum, int customerNum, LocalDate checkInDate, LocalDate checkOutDate) throws RecordNotFoundException, DMLException {
 		int totalPrice = 0;
 		LocalDate date = checkInDate;
@@ -201,7 +242,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 		return true;
 	}
 
-	// 비즈니스 로직
+	/**
+	 * 고객 정보를 등록합니다.
+	 *
+	 * @param customer 등록할 고객 객체
+	 * @throws DuplicateException 이미 등록된 고객일 경우
+	 * @throws DMLException DB 작업 중 오류 발생 시
+	 */
 	@Override
 	public void registerCustomer(Customer customer) throws DuplicateException, DMLException {
 		Connection conn = null;
@@ -228,6 +275,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 		    closeAll(ps, conn);
 		}
 	}
+	/**
+     * 고객 정보를 수정합니다.
+     *
+     * @param customer 수정할 고객 객체
+     * @throws RecordNotFoundException 해당 고객이 존재하지 않을 경우
+     * @throws DMLException DB 작업 중 오류 발생 시
+     */
 	@Override
 	public void updateCustomer(Customer customer) throws RecordNotFoundException, DMLException { // 회원정보 수정
 		Connection conn = null;
@@ -253,7 +307,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 			throw  new DMLException("업데이트 중 문제가 생겼습니다.");
 			}
 	}
-
+	 /**
+     * 고객 정보를 삭제합니다.
+     *
+     * @param customerId 삭제할 고객 번호
+     * @throws RecordNotFoundException 해당 고객이 존재하지 않을 경우
+     * @throws DMLException DB 작업 중 오류 발생 시
+     */
 	@Override
 	public void deleteCustomer(int customerId) throws RecordNotFoundException, DMLException { // 회원 삭제 customerid가 num 이여야함
 	    Connection conn = null;
@@ -274,7 +334,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 	        closeAll(ps, conn);
 	    }
 	}
-
+	/**
+	 * 예약 정보를 등록합니다.
+	 *
+	 * @param reservation 등록할 예약 객체
+	 * @throws DuplicateException 예약 번호가 이미 존재할 경우
+	 * @throws DMLException DB 작업 중 오류 발생 시
+	 */
 	@Override
 	public void addReservation(Reservation reservation) throws DuplicateException, RecordNotFoundException, DMLException {
 		String query = "INSERT INTO reservation (res_num, gus_Num, cus_num, res_cindate, res_coutdate, res_tprice, res_tpeople)"
@@ -332,7 +398,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 			closeAll(ps, conn);
 		}
 	}
-
+	/**
+     * 고객 정보를 수정합니다.
+     *
+     * @param customer 수정할 고객 객체
+     * @throws RecordNotFoundException 해당 고객이 존재하지 않을 경우
+     * @throws DMLException DB 작업 중 오류 발생 시
+     */
 	@Override
 	public void updateReservation(Reservation reservation) throws RecordNotFoundException, DMLException {
 		String query = "UPDATE reservation SET res_cindate=?, res_coutdate=?, res_tpeople=? WHERE res_num=?";
@@ -384,7 +456,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 			closeAll(ps, conn);
 		}
 	}
-
+	/**
+	 * 예약 정보를 취소합니다.
+	 *
+	 * @param reservationId 취소할 예약 번호
+	 * @throws RecordNotFoundException 해당 예약이 존재하지 않을 경우
+	 * @throws DMLException DB 작업 중 오류 발생 시
+	 */
 	@Override
 	public void cancelReservation(int reservationId) throws RecordNotFoundException, DMLException {
 		String query = "DELETE FROM reservation WHERE res_num=?";
@@ -412,7 +490,14 @@ public class CustomerDAOImpl implements CustomerDAO{
 			closeAll(ps, conn);
 		}
 	}
-
+	/**
+	 * 고객의 예약 내역을 조회합니다.
+	 *
+	 * @param customerId 고객 번호
+	 * @return 예약 목록 리스트
+	 * @throws RecordNotFoundException 예약 정보가 없을 경우
+	 * @throws DMLException DB 작업 중 오류 발생 시
+	 */
 	@Override
 	public List<Reservation> getReservation(int customerId) throws RecordNotFoundException, DMLException {
 		List<Reservation> resList = new ArrayList<>();
@@ -441,7 +526,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 		
 		return resList;
 	}
-
+	/**
+	 * 지역별로 게스트하우스 예약 목록을 조회합니다.
+	 *
+	 * @return 지역명과 예약 리스트를 매핑한 맵
+	 * @throws RecordNotFoundException 해당하는 게스트하우스가 존재하지 않을 경우
+	 * @throws DMLException DB 작업 중 오류 발생 시
+	 */
     @Override
     public Map<String, List<Reservation>> getRegionGHReservation() throws RecordNotFoundException, DMLException {
         Map<String, List<Reservation>> ghAllResList = new HashMap<>();
@@ -482,7 +573,13 @@ public class CustomerDAOImpl implements CustomerDAO{
         
         return ghAllResList;
     }
-
+    /**
+     * 고객 등급에 따라 할인율을 반환합니다.
+     *
+     * @param customerId 고객 ID
+     * @return 할인율 (VIP:30, GOLD:20, SILVER:15, BRONZE:10)
+     * @throws DMLException DB 작업 중 오류 발생 시
+     */
 	@Override
 	public int  getDiscountedPrice(int customerId) throws DMLException {
 	    int discountRate = 10; // 기본값 (BRONZE)
@@ -517,7 +614,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 
 	    return discountRate;
 	}
-
+	/**
+	 * 모든 게스트하우스 정보를 조회합니다.
+	 *
+	 * @return 게스트하우스 리스트
+	 * @throws RecordNotFoundException 기록이 없을 경우
+	 * @throws DMLException DB 작업 중 오류 발생 시
+	 */
 	@Override
 	public List<GuestHouse> getAllGuestHouses() throws RecordNotFoundException, DMLException {
 		Connection conn = null;
@@ -554,7 +657,15 @@ public class CustomerDAOImpl implements CustomerDAO{
 		return list;
 	}
 
-	// 게스트하우스 날짜별, 게스트하우스별 남은 인원 확인
+	/**
+	 * 특정 날짜에 해당 게스트하우스의 남은 수용 가능 인원을 조회합니다.
+	 *
+	 * @param gusNum 게스트하우스 번호
+	 * @param date 조회할 날짜
+	 * @return "남은인원/전체수용인원" 형식의 문자열
+	 * @throws RecordNotFoundException 해당 게스트하우스가 존재하지 않을 경우
+	 * @throws DMLException DB 작업 중 오류 발생 시
+	 */
 	@Override
 	public int getRemainingCapacity(int gusNum, Date date) throws RecordNotFoundException, DMLException {
 	    Connection conn = null;
@@ -595,7 +706,14 @@ public class CustomerDAOImpl implements CustomerDAO{
 	    return remainingCapacity;
 	}
 
-	
+	/**
+	 * 특정 서비스를 제공하는 게스트하우스 리스트를 반환합니다.
+	 *
+	 * @param service 서비스 이름 (예: "party", "breakfast")
+	 * @return 해당 서비스 제공 게스트하우스 리스트
+	 * @throws RecordNotFoundException 해당 서비스가 없을 경우
+	 * @throws DMLException DB 작업 중 오류 발생 시
+	 */
 	@Override
 	public List<GuestHouse> getGuestHouses(String service) throws RecordNotFoundException, DMLException {
 	    Connection conn = null;
@@ -634,6 +752,15 @@ public class CustomerDAOImpl implements CustomerDAO{
 
 	    return list;
 	}
+	/**
+	 * 특정 날짜의 게스트하우스 요금을 계산합니다. (주말 추가요금 포함)
+	 *
+	 * @param gusetHouseNum 게스트하우스 번호
+	 * @param date 조회 날짜
+	 * @return 계산된 요금
+	 * @throws RecordNotFoundException 해당 게스트하우스가 없을 경우
+	 * @throws DMLException DB 작업 중 오류 발생 시
+	 */
 	@Override
 	public int calculatePriceByDay(int gusetHouseNum, LocalDate date) throws RecordNotFoundException, DMLException {
 		int price = 0;
@@ -671,7 +798,14 @@ public class CustomerDAOImpl implements CustomerDAO{
 		return price;
 	}
 
-	//제주 부산 강원 서울 경기 충북 충남 경북 경남 전북 전남 의 지역의 게스트하우스 검색
+	/**
+	 * 지역명을 기준으로 게스트하우스를 검색합니다.
+	 *
+	 * @param region 지역명 (예: "서울", "부산")
+	 * @return 해당 지역의 게스트하우스 리스트
+	 * @throws RecordNotFoundException 해당 지역 게스트하우스가 없을 경우
+	 * @throws DMLException DB 작업 중 오류 발생 시
+	 */
 	@Override
 	public List<GuestHouse> getRegionGuestHouse(String region) throws RecordNotFoundException, DMLException{
 		Connection conn = null;
