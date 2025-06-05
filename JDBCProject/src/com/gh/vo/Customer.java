@@ -22,7 +22,6 @@ public class Customer {
 		this.ssn = ssn;
 		this.gender = gender;
 		this.phone = phone;
-		this.grade = grade;
 	}
 	public Customer(int num, String name, String address, String ssn, char gender, String phone, String grade) {
 		super();
