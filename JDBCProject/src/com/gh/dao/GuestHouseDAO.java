@@ -32,7 +32,7 @@ public interface GuestHouseDAO {
 	// key: 날짜(String), value: 매출 총합
 
 	// 7. 매출 기준 Top 5 게스트하우스 조회
-	public Map<String, GuestHouse> getTop5GHByRevenue()throws RecordNotFoundException, DMLException;
+	public Map<String, String> getTop5GHByRevenue()throws RecordNotFoundException, DMLException;
 
 	// 8. 전체 회원 조회
 	public List<Customer> getAllCustomers()throws RecordNotFoundException, DMLException;
