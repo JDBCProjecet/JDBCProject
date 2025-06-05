@@ -8,18 +8,31 @@ public class GuestHouse {
 	private String address ;// gus_address
 	private int price;//gus_price
 	private int capacity;//gus_capacity
+	private String service; //gus_service
 	ArrayList<Reservation>reservation;
 	public GuestHouse() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public GuestHouse(int num, String serviceName, String name, String address, int price, int capacity) {
+	public GuestHouse(String name, int price) {
+		super();
+		this.name = name;
+		this.price = price;
+	}
+	public GuestHouse(int num, String name, String address, int price, int capacity, String service) {
 		super();
 		this.num = num;
 		this.name = name;
 		this.address = address;
 		this.price = price;
 		this.capacity = capacity;
+		this.service = service;
+	}
+	public String getService() {
+		return service;
+	}
+	public void setService(String service) {
+		this.service = service;
 	}
 	public int getNum() {
 		return num;
@@ -53,8 +66,8 @@ public class GuestHouse {
 	}
 	@Override
 	public String toString() {
-		return "GuestHouse [num=" + num + ", serviceName="  + ", name=" + name + ", address=" + address
-				+ ", price=" + price + ", capacity=" + capacity + "]";
+		return "GuestHouse [num=" + num + ", name=" + name + ", address=" + address + ", price=" + price + ", capacity="
+				+ capacity + ", service=" + service + ", reservation=" + reservation + "]";
 	}
 	
 	

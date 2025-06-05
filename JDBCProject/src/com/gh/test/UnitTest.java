@@ -42,8 +42,13 @@ public class UnitTest implements Runnable {
 //			cdao.updateReservation(new Reservation(1,"파티",1,new Date(2025,05,24),new Date(2025,05,24),10,6));
 //			cdao.cancelReservation(1);
 //			cdao.getReservation(1).stream().forEach(System.out::println);
-//			System.out.println(gdao.getAllGHReservations().toString());
-			System.out.println("Test");
+//			cdao.getAllGuestHouses().stream().forEach(System.out::println);
+//			cdao.getRemainingCapacity(1);
+//			cdao.getGuestHouses("조식").stream().forEach(System.out::println);
+
+			
+//			System.out.println(gdao.getUsageStatsByDate());
+
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
