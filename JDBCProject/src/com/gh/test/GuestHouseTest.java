@@ -54,12 +54,11 @@ public class GuestHouseTest implements Runnable {
             System.out.println("2. 예약 조회");
             System.out.println("3. 예약 취소");
             System.out.println("4. 예약 변경");
-            System.out.println("5. 예약 후기 작성");
-            System.out.println("6. 회원가입");
-            System.out.println("7. 회원정보 수정");
-            System.out.println("8. 회원 탈퇴");
-            System.out.println("9. 프로모션(등급별 할인)");
-            System.out.println("10. 조회 기능");
+            System.out.println("5. 회원가입");
+            System.out.println("6. 회원정보 수정");
+            System.out.println("7. 회원 탈퇴");
+            System.out.println("8. 프로모션(등급별 할인)");
+            System.out.println("9. 조회 기능");
             System.out.println("0. 뒤로가기");
 
             int input = scanner.nextInt();
@@ -79,21 +78,18 @@ public class GuestHouseTest implements Runnable {
                 	modifyReservation();
                 	break;
                 case 5:
-                	writeReview();
-                	break;
-                case 6:
                 	signUp();
                 	break;
-                case 7:
+                case 6:
                 	updateUserInfo();
                 	break;
-                case 8:
+                case 7:
                 	deleteUser();
                 	break;
-                case 9:
+                case 8:
                 	viewPromotion();
                 	break;
-                case 10:
+                case 9:
                 	userSearchMenu();
                 	break;
                 case 0:
@@ -112,8 +108,10 @@ public class GuestHouseTest implements Runnable {
             System.out.println("2. 게스트하우스 등록");
             System.out.println("3. 게스트하우스 수정");
             System.out.println("4. 게스트하우스 삭제");
-            System.out.println("5. 예약 통계 기능");
-            System.out.println("6. 매출 통계 기능");
+            System.out.println("5. 회원 전체 조회");
+            System.out.println("6. 월별 총 이용객 조회");
+            System.out.println("7. 예약 통계 기능");
+            System.out.println("8. 매출 통계 기능");
             System.out.println("0. 뒤로가기");
 
             int input = scanner.nextInt();
@@ -133,9 +131,17 @@ public class GuestHouseTest implements Runnable {
                 	deleteGuestHouse();
                 	break;
                 case 5:
-                	reservationStats();
+                	//회원 전체 조회
+                	getAllCustomers();
                 	break;
                 case 6:
+                	//월별 총 이용객 조회
+                	getCustomerByMonth();
+                	break;
+                case 7:
+                	reservationStats();
+                	break;
+                case 8:
                 	salesStats();
                 	break;
                 case 0:
@@ -146,7 +152,31 @@ public class GuestHouseTest implements Runnable {
         }
     }
 
-    // ===================== 고객 기능 구현 =====================
+    private static void getCustomerByMonth() {
+    	try {
+    		Map<String, Integer> usages = gdao.getUsageStatsByDate();
+    		
+    		usages.forEach((str, num) -> System.out.println(str + ": " + num));
+			
+		} catch (RecordNotFoundException e) {
+			System.out.println(e.getMessage());
+		} catch (DMLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	private static void getAllCustomers() {
+		try {
+			gdao.getAllCustomers().stream()
+								  .forEach((c) -> System.out.println(c));
+		} catch (RecordNotFoundException e) {
+			System.out.println(e.getMessage());
+		} catch (DMLException e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	// ===================== 고객 기능 구현 =====================
     public static void signUp() {
         try {
             System.out.println("[회원가입]");
@@ -303,12 +333,6 @@ public class GuestHouseTest implements Runnable {
             System.out.println("❌ " + e.getMessage());
         }
     }
-
-
-    public static void writeReview() {
-        System.out.println("[후기 작성 기능은 현재 준비 중입니다.]");
-    }
-
 
     public static void viewPromotion() {
         try {
@@ -479,36 +503,71 @@ public class GuestHouseTest implements Runnable {
     }
 
     public static void reservationStats() {
-        try {
-            System.out.println("\n[게스트하우스별 예약 목록]");
-            Map<Integer, List<Reservation>> map = gdao.getAllGHReservations();
+    	while (true) {
+            System.out.println("\n--- 예약 통계 기능 ---");
+            System.out.println("1. 게스트하우스 전체 예약 조회");
+            System.out.println("2. 게스트하우스 지역별 예약 조회");
+            System.out.println("0. 뒤로가기");
 
-            for (Map.Entry<Integer, List<Reservation>> entry : map.entrySet()) {
-                System.out.println("🟩 게스트하우스 번호: " + entry.getKey());
-                entry.getValue().forEach(System.out::println);
+            try {
+                int input = Integer.parseInt(scanner.nextLine());
+
+                switch (input) {
+                    case 1:
+                    	Map<Integer, List<Reservation>> map = gdao.getAllGHReservations();
+                        map.forEach((num, list) -> list.forEach((r) -> System.out.println(r)));
+                        break;
+                    case 2:
+                    	System.out.print("조회할 지역을 입력하세요 (예: 서울): ");
+                        String region = scanner.nextLine();
+                        Map<String, List<Reservation>> mapRegion = gdao.getRegionGHReservation();
+                        mapRegion.get(region).forEach((r) -> System.out.println(r));
+                        break;
+                    case 0:
+                    	return;
+                    default:
+                    	System.out.println("잘못된 입력입니다.");
+                }
+
+            } catch (Exception e) {
+                System.out.println("❌ 오류: " + e.getMessage());
             }
-
-        } catch (RecordNotFoundException | DMLException e) {
-            System.out.println("❌ " + e.getMessage());
         }
     }
 
     public static void salesStats() {
-        try {
-            System.out.println("\n[게스트하우스별 매출 등급]");
-            Map<String, Integer> map = gdao.getTotalSalesPerGuestHouse();
-            for (String name : map.keySet()) {
-                System.out.println("🏨 " + name + " → " + map.get(name) + "등급");
-            }
+    	while (true) {
+            System.out.println("\n--- 매출 통계 기능 ---");
+            System.out.println("1. 날짜 별 총 매출 조회");
+            System.out.println("2. 게스트하우스 별 매출등급 조회");
+            System.out.println("3. 상위 매출 Top 3 조회");
+            System.out.println("0. 뒤로가기");
 
-            System.out.println("\n[Top 5 매출 게스트하우스]");
-            Map<String, GuestHouse> top5 = gdao.getTop5GHByRevenue();
-            for (String rank : top5.keySet()) {
-                System.out.println(rank + " → " + top5.get(rank));
-            }
+            try {
+                int input = Integer.parseInt(scanner.nextLine());
 
-        } catch (RecordNotFoundException | DMLException e) {
-            System.out.println("❌ " + e.getMessage());
+                switch (input) {
+                	case 1:
+                		Map<String, Integer> mapSales = gdao.getSalesStatsByDate();
+                		mapSales.forEach((name, gh) -> System.out.println(name + " : " + gh));
+                        break;
+                    case 2:
+                    	Map<String, Integer> mapSalesTotal = gdao.getTotalSalesPerGuestHouse();
+                    	mapSalesTotal.forEach((name, gh) -> System.out.println(name + " : " + gh));
+                		break;
+                    case 3:
+                    	Map<String, GuestHouse> mapTop5 = gdao.getTop5GHByRevenue();
+                    	mapTop5.forEach((name, gh) -> System.out.println(name + " : " + gh));
+                        break;
+                    case 0:
+                    	return;
+                    default:
+                    	System.out.println("잘못된 입력입니다.");
+                }
+
+            } catch (Exception e) {
+                System.out.println("❌ 오류: " + e.getMessage());
+            }
         }
     }
 	
