@@ -115,34 +115,8 @@ public class CustomerDAOImpl implements CustomerDAO{
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		
-		try {
-			String query = """
-					WITH RECURSIVE calendar AS (
-						SELECT MIN(res_cindate) AS res_date
-						FROM reservation
-						UNION ALL
-						SELECT DATE_ADD(res_date, INTERVAL 1 DAY)
-						FROM calendar
-						WHERE res_date < (SELECT MAX(res_coutdate) FROM reservation)
-					)
-					SELECT c.res_date, r.gus_num, SUM(r.res_tpeople) AS total_people
-					FROM calendar c
-					JOIN reservation r
-					ON c.res_date >= r.res_cindate AND c.res_date < r.res_coutdate AND r.gus_num=?
-					GROUP BY c.res_date, r.gus_num
-					ORDER BY c.res_date, r.gus_num;
-					""";
-			
-			ps = conn.prepareStatement(query);
-			ps.setInt(1, gusNum);
-			rs = ps.executeQuery();
-			
-			Map<LocalDate, Integer> datePeopleMap = new HashMap<LocalDate, Integer>();
-			while (rs.next()) {
-				datePeopleMap.put(rs.getDate("c.res_date").toLocalDate(), rs.getInt("total_people"));
-			}
-			
-			query = "SELECT gus_capacity FROM guesthouse WHERE gus_num=?";
+		try {			
+			String query = "SELECT gus_capacity FROM guesthouse WHERE gus_num=?";
 			ps = conn.prepareStatement(query);
 			ps.setInt(1, gusNum);
 			rs = ps.executeQuery();
@@ -152,9 +126,8 @@ public class CustomerDAOImpl implements CustomerDAO{
 				capacity = rs.getInt("gus_capacity");
 			}
 			
-			while (date.isEqual(checkOutDate) || date.isBefore(checkOutDate)) {	
-				System.out.println(date);
-				if (totalPeople > capacity || (datePeopleMap.get(date) != null && (datePeopleMap.get(date) + totalPeople) > capacity)) { // 방이 꽉찬 날이 있다면 false를 리턴
+			while (date.isEqual(checkOutDate) || date.isBefore(checkOutDate)) {
+				if (totalPeople > capacity || totalPeople > getRemainingCapacity(gusNum, Date.valueOf(date)) ) { // 방이 꽉찬 날이 있다면 false를 리턴
 					System.out.println(date + "에는 수용량을 초과합니다.");
 					return false;
 				}
@@ -163,7 +136,6 @@ public class CustomerDAOImpl implements CustomerDAO{
 			}
 			
 			return true;
-
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		} finally {
@@ -584,22 +556,24 @@ public class CustomerDAOImpl implements CustomerDAO{
 
 	// 게스트하우스 날짜별, 게스트하우스별 남은 인원 확인
 	@Override
-	public String getRemainingCapacity(int gusNum, Date date) throws RecordNotFoundException, DMLException {
+	public int getRemainingCapacity(int gusNum, Date date) throws RecordNotFoundException, DMLException {
 	    Connection conn = null;
 	    PreparedStatement ps = null;
 	    ResultSet rs = null;
+	    
 	    int remainingCapacity = 0;
-	    int capacity = 0;
 
 	    try {
 	        conn = getConnect();
 	        String query =
-	            "SELECT g.gus_capacity - IFNULL(SUM(r.res_tpeople), 0) AS remaining_capacity, g.gus_capacity " +
-	            "FROM guesthouse g " +
-	            "LEFT JOIN reservation r ON g.gus_num = r.gus_num " +
-	            "AND ? BETWEEN r.res_cindate AND r.res_coutdate " +
-	            "WHERE g.gus_num = ? " +
-	            "GROUP BY g.gus_capacity";
+	        	"""
+	            SELECT g.gus_capacity - IFNULL(SUM(r.res_tpeople), 0) AS remaining_capacity, g.gus_capacity
+	            FROM guesthouse g
+	            LEFT JOIN reservation r ON g.gus_num = r.gus_num
+	            AND ? BETWEEN r.res_cindate AND r.res_coutdate
+	            WHERE g.gus_num = ?
+	            GROUP BY g.gus_capacity
+	            """;
 
 	        ps = conn.prepareStatement(query);
 	        ps.setDate(1, date);
@@ -608,7 +582,6 @@ public class CustomerDAOImpl implements CustomerDAO{
 
 	        if (rs.next()) {
 	            remainingCapacity = rs.getInt("remaining_capacity");
-	            capacity = rs.getInt("gus_capacity");
 	        } else {
 	            throw new RecordNotFoundException("해당 게스트하우스가 존재하지 않거나 예약 내역이 없습니다.");
 	        }
@@ -619,7 +592,7 @@ public class CustomerDAOImpl implements CustomerDAO{
 	        closeAll(rs, ps, conn);
 	    }
 
-	    return remainingCapacity + "/" + capacity;
+	    return remainingCapacity;
 	}
 
 	
