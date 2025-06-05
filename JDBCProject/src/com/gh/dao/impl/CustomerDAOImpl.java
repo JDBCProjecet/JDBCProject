@@ -93,7 +93,7 @@ public class CustomerDAOImpl implements CustomerDAO{
 		
 		while (date.isBefore(checkOutDate)) {
 			totalPrice += calculatePriceByDay(guestHouseNum, date);
-			date.plusDays(1);
+			 date = date.plusDays(1);
 		}
 		
 		return totalPrice;
@@ -203,6 +203,7 @@ public class CustomerDAOImpl implements CustomerDAO{
 		} catch (SQLException e) {
 			throw new DMLException("예약 등록에 실패하였습니다.");
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new DMLException("예약 등록에 실패하였습니다.");
 		} finally {
 			closeAll(ps, conn);
@@ -492,8 +493,7 @@ public class CustomerDAOImpl implements CustomerDAO{
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		
-		String query = "SELECT gus_price FROM gusetHouse WHERE gus_name=?";
+		String query = "SELECT gus_price FROM guestHouse WHERE gus_num=?";
 		
 		try  {			
 			conn = getConnect();
@@ -502,7 +502,7 @@ public class CustomerDAOImpl implements CustomerDAO{
 			rs = ps.executeQuery();
 			
 			if (rs.next()) {
-				price = rs.getInt("price");
+				price = rs.getInt("gus_price");
 			}
 		} catch (SQLIntegrityConstraintViolationException e) {
 			throw new RecordNotFoundException("해당 게스트하우스가 존재하지 않습니다.");
@@ -518,5 +518,11 @@ public class CustomerDAOImpl implements CustomerDAO{
 		}		
 		
 		return price;
+	}
+	@Override
+	public Map<String, GuestHouse> getRegionGuestHouse() throws RecordNotFoundException, DMLException{
+		Map<String, GuestHouse>  RegionGuestHouse = new HashMap<>();
+		
+		return RegionGuestHouse;
 	}
 }

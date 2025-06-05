@@ -34,7 +34,7 @@ public interface CustomerDAO {
 	// 7. 예약 조회 (본인 예약 내역)
 	public List<Reservation> getReservation(int customerId)throws RecordNotFoundException, DMLException;
 
-	// 8. 게스트하우스 지역별 조회
+	// 8. 게스트하우스 지역별 예약조회
 	public Map<String, List<Reservation>> getRegionGHReservation() throws RecordNotFoundException, DMLException;
 
 	// 9. 회원 등급 확인 및 할인 적용
@@ -51,6 +51,8 @@ public interface CustomerDAO {
 
 	// 13. 요일에 따른 요금 계산
 	public int calculatePriceByDay(int gusetHouseNum, LocalDate date)throws RecordNotFoundException, DMLException;
-
+	
+	// 14. 게스트하우스 지역별 조회
+	public Map<String, GuestHouse> getRegionGuestHouse() throws RecordNotFoundException, DMLException;
 
 }
