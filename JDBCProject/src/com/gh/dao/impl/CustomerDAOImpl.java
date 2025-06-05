@@ -582,31 +582,33 @@ public class CustomerDAOImpl implements CustomerDAO{
 		return list;
 	}
 
-	//SELECT 문 + SUM + GROUP BY
-	//예약된 인원을 합산하여 최대 수용 인원에서 빼기
-	// MAX_CAPACITY - SUM(reserved_count) 계산
+	// 게스트하우스 날짜별, 게스트하우스별 남은 인원 확인
 	@Override
-	public int getRemainingCapacity(int gusNum) throws RecordNotFoundException, DMLException {
+	public String getRemainingCapacity(int gusNum, Date date) throws RecordNotFoundException, DMLException {
 	    Connection conn = null;
 	    PreparedStatement ps = null;
 	    ResultSet rs = null;
 	    int remainingCapacity = 0;
+	    int capacity = 0;
 
 	    try {
 	        conn = getConnect();
-	        String query = 
-	            "SELECT g.gus_capacity - IFNULL(SUM(r.res_tpeople), 0) AS remaining_capacity " +
-	            "FROM guestHouse g " +
+	        String query =
+	            "SELECT g.gus_capacity - IFNULL(SUM(r.res_tpeople), 0) AS remaining_capacity, g.gus_capacity " +
+	            "FROM guesthouse g " +
 	            "LEFT JOIN reservation r ON g.gus_num = r.gus_num " +
+	            "AND ? BETWEEN r.res_cindate AND r.res_coutdate " +
 	            "WHERE g.gus_num = ? " +
 	            "GROUP BY g.gus_capacity";
 
 	        ps = conn.prepareStatement(query);
-	        ps.setInt(1, gusNum);
+	        ps.setDate(1, date);
+	        ps.setInt(2, gusNum);
 	        rs = ps.executeQuery();
 
 	        if (rs.next()) {
 	            remainingCapacity = rs.getInt("remaining_capacity");
+	            capacity = rs.getInt("gus_capacity");
 	        } else {
 	            throw new RecordNotFoundException("해당 게스트하우스가 존재하지 않거나 예약 내역이 없습니다.");
 	        }
@@ -617,7 +619,7 @@ public class CustomerDAOImpl implements CustomerDAO{
 	        closeAll(rs, ps, conn);
 	    }
 
-	    return remainingCapacity;
+	    return remainingCapacity + "/" + capacity;
 	}
 
 	
@@ -696,10 +698,42 @@ public class CustomerDAOImpl implements CustomerDAO{
 		return price;
 	}
 
+	//제주 부산 강원 서울 경기 충북 충남 경북 경남 전북 전남 의 지역의 게스트하우스 검색
 	@Override
-	public Map<String, GuestHouse> getRegionGuestHouse() throws RecordNotFoundException, DMLException{
-		Map<String, GuestHouse>  RegionGuestHouse = new HashMap<>();
+	public List<GuestHouse> getRegionGuestHouse(String region) throws RecordNotFoundException, DMLException{
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		List<GuestHouse> RegionGuestHouse = new ArrayList<>();
 		
+		try {
+			conn = getConnect();
+			String query = """
+					SELECT gus_num, gus_name, gus_address, gus_price, gus_capacity, gus_service 
+					FROM guestHouse
+					WHERE substr(gus_address,1,2) = ?
+					""";
+			ps=conn.prepareStatement(query);
+			ps.setString(1, region);
+			rs=ps.executeQuery();
+			while(rs.next()) {
+				RegionGuestHouse.add(new GuestHouse(
+						   rs.getInt("gus_num"),
+			                rs.getString("gus_name"),
+			                rs.getString("gus_address"),
+			                rs.getInt("gus_price"),
+			                rs.getInt("gus_capacity"),
+			                rs.getString("gus_service")
+			            ));
+			}
+			if(RegionGuestHouse.isEmpty()) {
+				throw new RecordNotFoundException();
+			}
+		}catch(SQLException e) {
+			throw new DMLException();
+		}finally{
+			closeAll(rs,ps,conn);
+		}
 		return RegionGuestHouse;
 	}
 }

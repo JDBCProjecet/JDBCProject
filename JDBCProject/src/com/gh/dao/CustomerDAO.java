@@ -1,5 +1,6 @@
 package com.gh.dao;
 
+import java.sql.Date;
 import java.time.LocalDate;
 
 import java.util.List;
@@ -44,7 +45,7 @@ public interface CustomerDAO {
 	public List<GuestHouse> getAllGuestHouses()throws RecordNotFoundException, DMLException;
 
 	// 11. 게스트하우스 남은 인원 확인
-	public int getRemainingCapacity(int gusnum)throws RecordNotFoundException, DMLException;
+	public String getRemainingCapacity(int gusNum, Date date)throws RecordNotFoundException, DMLException;
 
 	// 12. 게스트하우스 특성 조건 검색
 	public List<GuestHouse> getGuestHouses(String service)throws RecordNotFoundException, DMLException;
@@ -53,6 +54,7 @@ public interface CustomerDAO {
 	public int calculatePriceByDay(int gusetHouseNum, LocalDate date)throws RecordNotFoundException, DMLException;
 	
 	// 14. 게스트하우스 지역별 조회
-	public Map<String, GuestHouse> getRegionGuestHouse() throws RecordNotFoundException, DMLException;
+	public List<GuestHouse> getRegionGuestHouse(String region) throws RecordNotFoundException, DMLException;
+
 
 }

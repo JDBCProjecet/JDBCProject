@@ -40,11 +40,16 @@ public class UnitTest implements Runnable {
 //			gdao.deleteGuestHouse(1);
 			// (int num, int gusNum, int cusNum, LocalDate checkInDate, LocalDate checkOutDate, int totalPrice,	int totalPeople)
 			cdao.addReservation(new Reservation(13, 2, 1, LocalDate.of(2025, 7, 10), LocalDate.of(2025, 7, 15), 0, 50));
+//			gdao.registerGuestHouse(new GuestHouse(11,"게하4","서울시 강남구 논현동",100000,5,"파티"));
+//			gdao.updateGuestHouse(new GuestHouse(11,"게하10","서울시 강남구 논현동",100000,10,"파티"));
+//			gdao.deleteGuestHouse(9);
+//			cdao.addReservation(new Reservation(1,"파티",1,new Date(2025,05,24),new Date(2025,05,24),10,5));
 //			cdao.updateReservation(new Reservation(1,"파티",1,new Date(2025,05,24),new Date(2025,05,24),10,6));
 //			cdao.cancelReservation(1);
 //			cdao.getReservation(1).stream().forEach(System.out::println);
 //			cdao.getAllGuestHouses().stream().forEach(System.out::println);
-//			cdao.getRemainingCapacity(1);
+			System.out.println("남은 인원 수: " + cdao.getRemainingCapacity(1, Date.valueOf("2025-06-10")));
+
 //			cdao.getGuestHouses("조식").stream().forEach(System.out::println);
 
 			
