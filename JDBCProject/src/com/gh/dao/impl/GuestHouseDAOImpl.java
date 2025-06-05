@@ -48,13 +48,13 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 		return rs.next();// ssn이 있으면 true |없으면 false
 	}
 
-	public boolean isCustomerExist(int num, Connection conn) throws SQLException{
+	public boolean isCustomerExist(int num, Connection conn) throws SQLException {
 		String query = "SELECT cus_num FROM customer WHERE cus_num=?";
-		PreparedStatement ps=conn.prepareStatement(query);
+		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setInt(1, num);
 		ResultSet rs = ps.executeQuery();
-		
-		return rs.next();//ssn이 있으면 true |없으면 false
+
+		return rs.next();// ssn이 있으면 true |없으면 false
 	}
 
 	public void closeAll(PreparedStatement ps, Connection conn) throws DMLException {
@@ -80,52 +80,52 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 
 	@Override
 	public Map<String, Integer> getTotalSalesPerGuestHouse() throws RecordNotFoundException, DMLException {
-	    Connection conn = null;
-	    PreparedStatement ps = null;
-	    ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
 
-	    // 결과를 담을 맵: 게스트하우스 이름 → 매출 등급(1~4)
-	    Map<String, Integer> result = new LinkedHashMap<>();
+		// 결과를 담을 맵: 게스트하우스 이름 → 매출 등급(1~4)
+		Map<String, Integer> result = new LinkedHashMap<>();
 
-	    try {
-	        conn = getConnect(); // DB 연결
+		try {
+			conn = getConnect(); // DB 연결
 
-	        // SQL: 각 게스트하우스의 총 매출을 구한 뒤, 매출순으로 NTILE(4)로 등급 부여
-	        String query = """
-	            SELECT 
-	                g.gus_name AS guesthouse_name,                         -- 게스트하우스 이름
-	                SUM(r.res_tprice) AS total_sales,                     -- 총 매출 (reservation 테이블의 가격 합계)
-	                NTILE(4) OVER (ORDER BY SUM(r.res_tprice) DESC) AS sales_rank -- 매출 순서대로 1~4등급 나눔
-	            FROM guesthouse g
-	            JOIN reservation r ON g.gus_num = r.gus_num              -- 게스트하우스와 예약 테이블 조인
-	            GROUP BY g.gus_name                                       -- 게스트하우스별로 그룹화
-	        """;
+			// SQL: 각 게스트하우스의 총 매출을 구한 뒤, 매출순으로 NTILE(4)로 등급 부여
+			String query = """
+					    SELECT
+					        g.gus_name AS guesthouse_name,                         -- 게스트하우스 이름
+					        SUM(r.res_tprice) AS total_sales,                     -- 총 매출 (reservation 테이블의 가격 합계)
+					        NTILE(4) OVER (ORDER BY SUM(r.res_tprice) DESC) AS sales_rank -- 매출 순서대로 1~4등급 나눔
+					    FROM guesthouse g
+					    JOIN reservation r ON g.gus_num = r.gus_num              -- 게스트하우스와 예약 테이블 조인
+					    GROUP BY g.gus_name                                       -- 게스트하우스별로 그룹화
+					""";
 
-	        ps = conn.prepareStatement(query); // SQL 실행 준비
-	        rs = ps.executeQuery();            // SQL 실행 → 결과 받아오기
+			ps = conn.prepareStatement(query); // SQL 실행 준비
+			rs = ps.executeQuery(); // SQL 실행 → 결과 받아오기
 
-	        // 결과 ResultSet을 순회하며 Map에 저장
-	        while (rs.next()) {
-	            String name = rs.getString("guesthouse_name"); // 게스트하우스 이름
-	            int rank = rs.getInt("sales_rank");             // NTILE로 계산된 등급 (1~4)
+			// 결과 ResultSet을 순회하며 Map에 저장
+			while (rs.next()) {
+				String name = rs.getString("guesthouse_name"); // 게스트하우스 이름
+				int rank = rs.getInt("sales_rank"); // NTILE로 계산된 등급 (1~4)
 
-	            result.put(name, rank); // 결과 맵에 저장 (이름 → 등급)
-	        }
+				result.put(name, rank); // 결과 맵에 저장 (이름 → 등급)
+			}
 
-	        // 결과가 아무것도 없으면 예외 발생
-	        if (result.isEmpty()) {
-	            throw new RecordNotFoundException("게스트하우스 매출 정보가 없습니다.");
-	        }
+			// 결과가 아무것도 없으면 예외 발생
+			if (result.isEmpty()) {
+				throw new RecordNotFoundException("게스트하우스 매출 정보가 없습니다.");
+			}
 
-	        return result; // 최종 결과 반환
+			return result; // 최종 결과 반환
 
-	    } catch (SQLException e) {
-	        // DB 작업 중 예외 발생 시 DMLException으로 래핑하여 던짐
-	        throw new DMLException("게스트 하우스 매출 등급 조회 중 오류 발생: " + e.getMessage());
-	    } finally {
-	        // 리소스 정리
-	        closeAll(rs, ps, conn);
-	    }
+		} catch (SQLException e) {
+			// DB 작업 중 예외 발생 시 DMLException으로 래핑하여 던짐
+			throw new DMLException("게스트 하우스 매출 등급 조회 중 오류 발생: " + e.getMessage());
+		} finally {
+			// 리소스 정리
+			closeAll(rs, ps, conn);
+		}
 	}
 
 	/*
@@ -178,7 +178,7 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 				ps.setInt(4, guestHouse.getCapacity());
 				ps.setString(5, guestHouse.getService());
 				ps.setInt(6, guestHouse.getNum());
-				System.out.println(ps.executeUpdate() + "명 수정함");
+				System.out.println(ps.executeUpdate() + guestHouse.getName() + "정보 업데이트완료");
 			} else {
 				throw new RecordNotFoundException("해당 게하없음");
 			}
@@ -203,7 +203,7 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 
 				ps.setInt(1, guestHouseId);
 
-				System.out.println(ps.executeUpdate() + "명 삭제함");
+				System.out.println(ps.executeUpdate() + "개 게하 삭제완료");
 			} else {
 				throw new RecordNotFoundException("해당 게하없음");
 			}
@@ -216,7 +216,7 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 		}
 
 	}
-	
+
 	// 날짜별 총 이용객 수 확인
 	@Override
 	public Map<String, Integer> getUsageStatsByDate() throws RecordNotFoundException, DMLException {
@@ -224,90 +224,98 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		Map<String, Integer> customersByDay = new LinkedHashMap<>();
-		
+
 		try {
 			conn = getConnect();
-			String sql =
-					"""
-					SELECT res_cindate, SUM(res_tpeople) AS total_people 
-					FROM reservation 
-					GROUP BY res_cindate 
+			String sql = """
+					SELECT res_cindate, SUM(res_tpeople) AS total_people
+					FROM reservation
+					GROUP BY res_cindate
 					ORDER BY 1
 					""";
-			ps=conn.prepareStatement(sql);
-			rs=ps.executeQuery();
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
 			while (rs.next()) {
-			    String day = rs.getString("res_cindate");
-			    int totalPeople = rs.getInt("total_people");
-			    customersByDay.put(day, totalPeople);
-			    
+				String day = rs.getString("res_cindate");
+				int totalPeople = rs.getInt("total_people");
+				customersByDay.put(day, totalPeople);
+
 			}
-		}catch(SQLException e){
+		} catch (SQLException e) {
 			throw new DMLException("잘못된 쿼리문입니다.");
-		}finally {
+		} finally {
 			closeAll(rs, ps, conn);
 		}
 		return customersByDay;
 	}
-	
-	//날짜별 총 매출 확인
+
+	// 날짜별 총 매출 확인
 	@Override
 	public Map<String, Integer> getSalesStatsByDate() throws RecordNotFoundException, DMLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		Map<String, Integer> salesByDay = new LinkedHashMap<>();
-		
+
 		try {
 			conn = getConnect();
 			String sql = """
-					SELECT res_cindate, SUM(res_tprice) AS total_price 
-					FROM reservation 
-					GROUP BY res_cindate 
+					SELECT res_cindate, SUM(res_tprice) AS total_price
+					FROM reservation
+					GROUP BY res_cindate
 					ORDER BY 1
 					""";
-			ps=conn.prepareStatement(sql);
-			rs=ps.executeQuery();
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
 			while (rs.next()) {
-			    String day = rs.getString("res_cindate");
-			    int totalPeople = rs.getInt("total_price");
-			    salesByDay.put(day, totalPeople);
+				String day = rs.getString("res_cindate");
+				int totalPeople = rs.getInt("total_price");
+				salesByDay.put(day, totalPeople);
 			}
-		}catch(SQLException e){
+		} catch (SQLException e) {
 			throw new DMLException("잘못된 쿼리문입니다.");
-		}finally {
+		} finally {
 			closeAll(rs, ps, conn);
 		}
 		return salesByDay;
 	}
-	
-	//매출 기준 Top 5 게스트하우스 조회
+
+	// 매출 기준 Top 5 게스트하우스 조회
 	@Override
-	public Map<String, GuestHouse> getTop5GHByRevenue() throws RecordNotFoundException, DMLException {
+	public Map<String, String> getTop5GHByRevenue() throws RecordNotFoundException, DMLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		 Map<String, GuestHouse> ghRank = new LinkedHashMap<>();
+		Map<String, String> ghRank = new LinkedHashMap<>();
 		try {
 			conn = getConnect();
 			String sql = """
-				    SELECT gus_num, gus_name, total_price, 
-			           RANK() OVER (ORDER BY total_price DESC) AS ranking
-					FROM ( SELECT gus_num, g.gus_name, SUM(r.res_tprice) AS total_price
-					      	FROM reservation r
-					      	JOIN guesthouse g USING(gus_num)
-					      	GROUP BY g.gus_num, g.gus_name
-					  	) AS ranked
-					  	""";
-			ps=conn.prepareStatement(sql);
-			rs=ps.executeQuery();
+					SELECT
+					    gus_num,
+					    gus_name,
+					    total_price,
+					    ranking
+					FROM ( SELECT
+						        gus_num,
+						        gus_name,
+						        SUM(r.res_tprice) AS total_price,
+						        RANK() OVER (ORDER BY SUM(r.res_tprice) DESC) AS ranking
+						    FROM reservation r
+						    JOIN guesthouse g USING (gus_num)
+						    GROUP BY gus_num, gus_name
+						) AS ranked
+						WHERE ranking <= 5
+						""";
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
 			while (rs.next()) {
-				ghRank.put(rs.getString("ranking")+"등",new GuestHouse(rs.getString("gus_name"),rs.getInt("total_price")));
-			  
+				ghRank.put(rs.getString("ranking") + "등",
+						rs.getString("gus_name") + ", 총 매출: " + rs.getInt("total_price"));
+
 			}
-		}catch(SQLException e){
+		} catch (SQLException e) {
 			throw new DMLException("잘못된 쿼리문입니다.");
-		}finally {
+		} finally {
 			closeAll(rs, ps, conn);
 		}
 		return ghRank;
@@ -315,34 +323,28 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 
 	@Override
 	public List<Customer> getAllCustomers() throws RecordNotFoundException, DMLException {
-		 	Connection conn = null;
-		    PreparedStatement ps  = null;
-		    ResultSet rs = null;
-		    List<Customer> list = new ArrayList<>();
-		    try {
-		        conn = getConnect();
-		        String query = "SELECT cus_num, cus_name, cus_address, cus_ssn, cus_gender, cus_phone, cus_grade FROM customer";
-		        ps = conn.prepareStatement(query);
-		        rs = ps.executeQuery();
-		        while (rs.next()) {
-		            Customer c = new Customer(
-		                rs.getInt("cus_num"),
-		                rs.getString("cus_name"),
-		                rs.getString("cus_address"),
-		                rs.getString("cus_ssn"),
-		                rs.getString("cus_gender").charAt(0),
-		                rs.getString("cus_phone"),
-		                rs.getString("cus_grade")
-		            );
-		            list.add(c);
-		        }
-		        return list;
-		    } catch (SQLException e) {
-		        throw new DMLException("회원 조회 중 문제가 발생했습니다.");
-		    } finally {
-		        closeAll(rs, ps, conn);
-		    }
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		List<Customer> list = new ArrayList<>();
+		try {
+			conn = getConnect();
+			String query = "SELECT cus_num, cus_name, cus_address, cus_ssn, cus_gender, cus_phone, cus_grade FROM customer";
+			ps = conn.prepareStatement(query);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				Customer c = new Customer(rs.getInt("cus_num"), rs.getString("cus_name"), rs.getString("cus_address"),
+						rs.getString("cus_ssn"), rs.getString("cus_gender").charAt(0), rs.getString("cus_phone"),
+						rs.getString("cus_grade"));
+				list.add(c);
+			}
+			return list;
+		} catch (SQLException e) {
+			throw new DMLException("회원 조회 중 문제가 발생했습니다.");
+		} finally {
+			closeAll(rs, ps, conn);
 		}
+	}
 
 	@Override
 	public void assignCustomerGrades() throws RecordNotFoundException, DMLException {
@@ -350,13 +352,21 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 		PreparedStatement ps = null;
 		PreparedStatement ps2 = null;
 		ResultSet rs = null;
+		
 		try {
 			conn = getConnect();
-			// 회원별 집계
-			String query = "SELECT cus_num, COUNT(*) AS res_count FROM reservation GROUP BY cus_num";
+
+			// 1. 회원별 이용횟수와 현재 등급 조회
+			String query = """
+				SELECT c.cus_name,c.cus_num, COUNT(r.res_num) AS res_count, c.cus_grade
+				FROM customer c
+				LEFT JOIN reservation r ON c.cus_num = r.cus_num
+				GROUP BY c.cus_num, c.cus_grade
+			""";
 			ps = conn.prepareStatement(query);
 			rs = ps.executeQuery();
-			// 회원 등급 업데이트
+
+			// 2. 등급 업데이트 쿼리
 			String updateQuery = "UPDATE customer SET cus_grade = ? WHERE cus_num = ?";
 			ps2 = conn.prepareStatement(updateQuery);
 
@@ -365,109 +375,115 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 			while (rs.next()) {
 				int cusNum = rs.getInt("cus_num");
 				int count = rs.getInt("res_count");
+				String currentGrade = rs.getString("cus_grade");
+				String cusName=rs.getString("cus_name");
+				// 새 등급 판단
+				String newGrade = "BRONZE";
+				if (count >= 10) {
+					newGrade = "GOLD";
+				} else if (count >= 5) {
+					newGrade = "SILVER";
+				}
 
-				String grade;
-				if (count >= 5)
-					grade = "GOLD";
-				else if (count >= 3)
-					grade = "SILVER";
-				else
-					grade = "BRONZE";
+				// 현재 등급과 다르면 업데이트
+				if (!newGrade.equalsIgnoreCase(currentGrade)) {
+					ps2.setString(1, newGrade);
+					ps2.setInt(2, cusNum);
 
-				ps2.setString(1, grade);
-				ps2.setInt(2, cusNum);
-				System.out.println(ps2.executeUpdate() + "회원 등급별 업데이트 완료");
-
-				isUpdated = true;
+					int result = ps2.executeUpdate();
+					if (result > 0) {
+						System.out.println(cusName+" 회원님의 등급이 " + currentGrade + " → " + newGrade + "로 변경되었습니다.");
+						isUpdated = true;
+					}
+				}
 			}
-			if (!isUpdated)
-				throw new RecordNotFoundException("등급을 부여할 회원이 없습니다.");
+
+			if (!isUpdated) {
+				System.out.println("변경된 회원 등급이 없습니다.");
+			}
 
 		} catch (SQLException e) {
-			throw new DMLException("회원 등굽 부여 중 오류 발생" + e.getMessage());
-
+			throw new DMLException("회원 등급 갱신 중 오류 발생: " + e.getMessage());
 		} finally {
 			closeAll(rs, ps, conn);
-			closeAll(ps2, null);
 		}
-
 	}
 
 	@Override
 	public Map<Integer, List<Reservation>> getAllGHReservations() throws RecordNotFoundException, DMLException {
 		Map<Integer, List<Reservation>> ghAllResList = new HashMap<>();
-		
+
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		
+
 		try {
 			conn = getConnect();
-			
+
 			String query = "SELECT gus_num FROM guestHouse ORDER BY gus_Num";
 			ps = conn.prepareStatement(query);
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				ghAllResList.put(rs.getInt("gus_num"), new ArrayList<Reservation>());
-			}		
-			
+			}
+
 			query = "SELECT res_num, gus_Num, cus_num, res_cindate, res_coutdate, res_tprice, res_tpeople FROM reservation ORDER BY gus_Num";
 			ps = conn.prepareStatement(query);
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				ghAllResList.get(rs.getInt("gus_Num"))
-							.add(new Reservation(rs.getInt("res_num"), rs.getInt("gus_Num"), rs.getInt("cus_num"), 
-									rs.getDate("res_cindate").toLocalDate(), rs.getDate("res_coutdate").toLocalDate(), 
-									rs.getInt("res_tprice"), rs.getInt("res_tpeople")));
+						.add(new Reservation(rs.getInt("res_num"), rs.getInt("gus_Num"), rs.getInt("cus_num"),
+								rs.getDate("res_cindate").toLocalDate(), rs.getDate("res_coutdate").toLocalDate(),
+								rs.getInt("res_tprice"), rs.getInt("res_tpeople")));
 			}
-			
+
 		} catch (SQLIntegrityConstraintViolationException e) {
 			throw new RecordNotFoundException("해당하는 게스트하우스가 존재하지 않음.");
 		} catch (SQLException e) {
 			throw new DMLException("전체 게스트하우스 예약 조회 실패함.");
 		}
-		
+
 		return ghAllResList;
 	}
 
 	@Override
 	public Map<String, List<Reservation>> getRegionGHReservation() throws RecordNotFoundException, DMLException {
 		Map<String, List<Reservation>> ghAllResList = new HashMap<>();
-		
+
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		
+
 		try {
 			conn = getConnect();
-			
+
 			// {지역: 예약 리스트}로 반환
-			// 1. 
+			// 1.
 			String query = "SELECT gus_num, gus_address, substr(gus_address, 1, 2) address FROM guestHouse";
 			ps = conn.prepareStatement(query);
 			rs = ps.executeQuery();
-			Map<Integer, String> ghAddressMap = new HashMap<>(); 
+			Map<Integer, String> ghAddressMap = new HashMap<>();
 			while (rs.next()) {
 				ghAllResList.put(rs.getString("address"), new ArrayList<Reservation>());
 				ghAddressMap.put(rs.getInt("gus_num"), rs.getString("address"));
-			}		
-			
+			}
+
 			query = "SELECT res_num, gus_Num, cus_num, res_cindate, res_coutdate, res_tprice, res_tpeople FROM reservation";
 			ps = conn.prepareStatement(query);
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				ghAllResList.get(ghAddressMap.get(rs.getInt("gus_num")))
-							.add(new Reservation(rs.getInt("res_num"), rs.getInt("gus_Num"), rs.getInt("cus_num"), 
-									rs.getDate("res_cindate").toLocalDate(), rs.getDate("res_coutdate").toLocalDate(), 
-									rs.getInt("res_tprice"), rs.getInt("res_tpeople")));
+						.add(new Reservation(rs.getInt("res_num"), rs.getInt("gus_Num"), rs.getInt("cus_num"),
+								rs.getDate("res_cindate").toLocalDate(), rs.getDate("res_coutdate").toLocalDate(),
+								rs.getInt("res_tprice"), rs.getInt("res_tpeople")));
 			}
-			
+
 		} catch (SQLIntegrityConstraintViolationException e) {
 			throw new RecordNotFoundException("해당하는 게스트하우스가 존재하지 않음.");
 		} catch (SQLException e) {
 			throw new DMLException("전체 게스트하우스 예약 조회 실패함.");
 		}
-		
+
 		return ghAllResList;
 	}
 

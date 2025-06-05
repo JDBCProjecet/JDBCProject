@@ -153,7 +153,6 @@ public class CustomerDAOImpl implements CustomerDAO{
 			}
 			
 			while (date.isEqual(checkOutDate) || date.isBefore(checkOutDate)) {	
-				System.out.println(date);
 				if (totalPeople > capacity || (datePeopleMap.get(date) != null && (datePeopleMap.get(date) + totalPeople) > capacity)) { // 방이 꽉찬 날이 있다면 false를 리턴
 					System.out.println(date + "에는 수용량을 초과합니다.");
 					return false;
