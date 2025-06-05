@@ -371,72 +371,120 @@ public class CustomerDAOImpl implements CustomerDAO{
 
 	    return discountRate;
 	}
+
 	@Override
 	public List<GuestHouse> getAllGuestHouses() throws RecordNotFoundException, DMLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		ArrayList<GuestHouse> list = new ArrayList<GuestHouse>();
-		
-		String query = "SELECT gus_num, service_name, gus_name, gus_address, gus_price, gus_capacity FROM guestHouse";
-		
+
+		String query = "SELECT gus_num, gus_name, gus_address, gus_price, gus_capacity, gus_service FROM guestHouse";
+
 		try {
 			conn = getConnect();
 			ps = conn.prepareStatement(query);
 			rs = ps.executeQuery();
-			
-			while(rs.next()) {
-				GuestHouse gh = new GuestHouse(
-						rs.getInt("gus_num"),
-						rs.getString("service_name"),
+
+			while (rs.next()) {
+				GuestHouse gh = new GuestHouse(rs.getInt("gus_num"),
 						rs.getString("gus_name"),
 						rs.getString("gus_address"),
 						rs.getInt("gus_price"),
-						rs.getInt("gus_capacity")
+						rs.getInt("gus_capacity"),
+						rs.getString("gus_service")
 						);
 				list.add(gh);
 			}
-			
-			
-		}catch(SQLIntegrityConstraintViolationException e) {
+
+		} catch (SQLIntegrityConstraintViolationException e) {
 			throw new RecordNotFoundException("기록된거없음");
-		}catch(SQLException e) {
+		} catch (SQLException e) {
 			throw new DMLException("오류발생함");
 		} finally {
 			closeAll(rs, ps, conn);
 		}
-		
-		
-		return list;
-		}
 
-	@Override
-	public int getRemainingCapacity(String guestHouseName) throws RecordNotFoundException, DMLException {
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		int remainingCapacity = 0;
-		
-		try {
-			conn = getConnect();
-			String qeury = "SELECT ";
-		} catch(SQLIntegrityConstraintViolationException e) {
-			throw new RecordNotFoundException("해당게하 없음");
-		} catch(SQLException e) {
-			throw new DMLException("오류발생"+e.getMessage());
-		} finally {
-			closeAll(rs, ps, conn);
-		}
-		
-		return remainingCapacity;
+		return list;
 	}
 
+	//SELECT 문 + SUM + GROUP BY
+	//예약된 인원을 합산하여 최대 수용 인원에서 빼기
+	// MAX_CAPACITY - SUM(reserved_count) 계산
+	@Override
+	public int getRemainingCapacity(int gusNum) throws RecordNotFoundException, DMLException {
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+	    int remainingCapacity = 0;
+
+	    try {
+	        conn = getConnect();
+	        String query = 
+	            "SELECT g.gus_capacity - IFNULL(SUM(r.res_tpeople), 0) AS remaining_capacity " +
+	            "FROM guestHouse g " +
+	            "LEFT JOIN reservation r ON g.gus_num = r.gus_num " +
+	            "WHERE g.gus_num = ? " +
+	            "GROUP BY g.gus_capacity";
+
+	        ps = conn.prepareStatement(query);
+	        ps.setInt(1, gusNum);
+	        rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            remainingCapacity = rs.getInt("remaining_capacity");
+	        } else {
+	            throw new RecordNotFoundException("해당 게스트하우스가 존재하지 않거나 예약 내역이 없습니다.");
+	        }
+
+	    } catch (SQLException e) {
+	        throw new DMLException("오류 발생: " + e.getMessage());
+	    } finally {
+	        closeAll(rs, ps, conn);
+	    }
+
+	    return remainingCapacity;
+	}
+
+	
 	@Override
 	public List<GuestHouse> getGuestHouses(String service) throws RecordNotFoundException, DMLException {
-		//sdfsdfsfd
-		return null;
-	}
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+	    List<GuestHouse> list = new ArrayList<>();
 
+	    try {
+	        conn = getConnect();
+	        String query = "SELECT gus_num, gus_name, gus_address, gus_price, gus_capacity, gus_service FROM guestHouse WHERE gus_service = ?";
+	        ps = conn.prepareStatement(query);
+	        ps.setString(1, service); // "party" 또는 "breakfast"
+	        rs = ps.executeQuery();
+
+	        while (rs.next()) {
+	            GuestHouse gh = new GuestHouse(
+	                rs.getInt("gus_num"),
+	                rs.getString("gus_name"),
+	                rs.getString("gus_address"),
+	                rs.getInt("gus_price"),
+	                rs.getInt("gus_capacity"),
+	                rs.getString("gus_service")
+	            );
+	            list.add(gh);
+	        }
+
+	        if (list.isEmpty()) {
+	            throw new RecordNotFoundException("해당 서비스 '" + service + "'를 제공하는 게스트하우스가 없습니다.");
+	        }
+
+	    } catch (SQLException e) {
+	        throw new DMLException(e.getMessage());
+	    } finally {
+	        closeAll(rs, ps, conn);
+	    }
+
+	    return list;
+	}
 	@Override
 	public int calculatePriceByDay(int gusetHouseNum, LocalDate date) throws RecordNotFoundException, DMLException {
 		int price = 0;
