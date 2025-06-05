@@ -519,10 +519,42 @@ public class CustomerDAOImpl implements CustomerDAO{
 		
 		return price;
 	}
+	//제주 부산 강원 서울 경기 충북 충남 경북 경남 전북 전남 의 지역의 게스트하우스 검색
 	@Override
-	public Map<String, GuestHouse> getRegionGuestHouse() throws RecordNotFoundException, DMLException{
-		Map<String, GuestHouse>  RegionGuestHouse = new HashMap<>();
+	public List<GuestHouse> getRegionGuestHouse(String region) throws RecordNotFoundException, DMLException{
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		List<GuestHouse> RegionGuestHouse = new ArrayList<>();
 		
+		try {
+			conn = getConnect();
+			String query = """
+					SELECT gus_num, gus_name, gus_address, gus_price, gus_capacity, gus_service 
+					FROM guestHouse
+					WHERE substr(gus_address,1,2) = ?
+					""";
+			ps=conn.prepareStatement(query);
+			ps.setString(1, region);
+			rs=ps.executeQuery();
+			while(rs.next()) {
+				RegionGuestHouse.add(new GuestHouse(
+						   rs.getInt("gus_num"),
+			                rs.getString("gus_name"),
+			                rs.getString("gus_address"),
+			                rs.getInt("gus_price"),
+			                rs.getInt("gus_capacity"),
+			                rs.getString("gus_service")
+			            ));
+			}
+			if(RegionGuestHouse.isEmpty()) {
+				throw new RecordNotFoundException();
+			}
+		}catch(SQLException e) {
+			throw new DMLException();
+		}finally{
+			closeAll(rs,ps,conn);
+		}
 		return RegionGuestHouse;
 	}
 }

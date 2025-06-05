@@ -53,6 +53,6 @@ public interface CustomerDAO {
 	public int calculatePriceByDay(int gusetHouseNum, LocalDate date)throws RecordNotFoundException, DMLException;
 	
 	// 14. 게스트하우스 지역별 조회
-	public Map<String, GuestHouse> getRegionGuestHouse() throws RecordNotFoundException, DMLException;
+	public List<GuestHouse> getRegionGuestHouse(String region) throws RecordNotFoundException, DMLException;
 
 }
