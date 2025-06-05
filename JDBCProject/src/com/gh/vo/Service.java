@@ -3,6 +3,7 @@ package com.gh.vo;
 import java.util.ArrayList;
 
 public class Service {
+
 	private String name; // Service_name
 	ArrayList<Reservation> reservation;
 	ArrayList<GuestHouse> guestHouse;
@@ -17,6 +18,7 @@ public class Service {
 		this.reservation = reservation;
 		this.guestHouse = guestHouse;
 	}
+
 
 	public String getName() {
 		return name;
@@ -42,9 +44,11 @@ public class Service {
 		this.guestHouse = guestHouse;
 	}
 
+
 	@Override
 	public String toString() {
 		return "Service [name=" + name + ", reservation=" + reservation + ", guestHouse=" + guestHouse + "]";
 	}
+
 
 }

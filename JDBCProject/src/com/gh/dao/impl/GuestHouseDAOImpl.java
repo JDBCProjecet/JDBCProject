@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -79,14 +80,58 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 
 	@Override
 	public Map<String, Integer> getTotalSalesPerGuestHouse() throws RecordNotFoundException, DMLException {
-		// TODO Auto-generated method stub
-		return null;
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
+
+	    // 결과를 담을 맵: 게스트하우스 이름 → 매출 등급(1~4)
+	    Map<String, Integer> result = new LinkedHashMap<>();
+
+	    try {
+	        conn = getConnect(); // DB 연결
+
+	        // SQL: 각 게스트하우스의 총 매출을 구한 뒤, 매출순으로 NTILE(4)로 등급 부여
+	        String query = """
+	            SELECT 
+	                g.gus_name AS guesthouse_name,                         -- 게스트하우스 이름
+	                SUM(r.res_tprice) AS total_sales,                     -- 총 매출 (reservation 테이블의 가격 합계)
+	                NTILE(4) OVER (ORDER BY SUM(r.res_tprice) DESC) AS sales_rank -- 매출 순서대로 1~4등급 나눔
+	            FROM guesthouse g
+	            JOIN reservation r ON g.gus_num = r.gus_num              -- 게스트하우스와 예약 테이블 조인
+	            GROUP BY g.gus_name                                       -- 게스트하우스별로 그룹화
+	        """;
+
+	        ps = conn.prepareStatement(query); // SQL 실행 준비
+	        rs = ps.executeQuery();            // SQL 실행 → 결과 받아오기
+
+	        // 결과 ResultSet을 순회하며 Map에 저장
+	        while (rs.next()) {
+	            String name = rs.getString("guesthouse_name"); // 게스트하우스 이름
+	            int rank = rs.getInt("sales_rank");             // NTILE로 계산된 등급 (1~4)
+
+	            result.put(name, rank); // 결과 맵에 저장 (이름 → 등급)
+	        }
+
+	        // 결과가 아무것도 없으면 예외 발생
+	        if (result.isEmpty()) {
+	            throw new RecordNotFoundException("게스트하우스 매출 정보가 없습니다.");
+	        }
+
+	        return result; // 최종 결과 반환
+
+	    } catch (SQLException e) {
+	        // DB 작업 중 예외 발생 시 DMLException으로 래핑하여 던짐
+	        throw new DMLException("게스트 하우스 매출 등급 조회 중 오류 발생: " + e.getMessage());
+	    } finally {
+	        // 리소스 정리
+	        closeAll(rs, ps, conn);
+	    }
 	}
 
 	/*
-	 * gus_num INT PRIMARY KEY, -- 게스트하우스 번호 service_name VARCHAR(10), -- 서비스이름 (FK)
-	 * gus_name VARCHAR(10), -- 이름 gus_address VARCHAR(30), -- 주소 gus_price INT, --
-	 * 가격 gus_capacity INT, -- 수용인원
+	 * 1. DB 연결 2. 게스트하우스와 예약 테이블 JOIN 3. 게스트하우스별 총 매출 계산 (SUM) 4. NTILE(4)로 등급 나누기
+	 * (1: 상위 ~ 4: 하위) 5. 결과를 Map<게스트하우스 이름, 등급>에 저장 6. 반환 or 예외 처리
+	 * 
 	 */
 
 	@Override
@@ -224,7 +269,7 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 	public void assignCustomerGrades() throws RecordNotFoundException, DMLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
-	    PreparedStatement ps2 = null;
+		PreparedStatement ps2 = null;
 		ResultSet rs = null;
 		try {
 			conn = getConnect();
@@ -234,38 +279,39 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 			rs = ps.executeQuery();
 			// 회원 등급 업데이트
 			String updateQuery = "UPDATE customer SET cus_grade = ? WHERE cus_num = ?";
-	        ps2 = conn.prepareStatement(updateQuery);
-			
-	        boolean isUpdated = false;
-	        
-	        while(rs.next()) {
-	        	int cusNum  = rs.getInt("cus_num");
-	        	int count = rs.getInt("res_count");
-	        	
-	        	  String grade;
-	              if (count >= 10) grade = "VIP";
-	              else if (count >= 5) grade = "GOLD";
-	              else if (count >= 1) grade = "SILVER";
-	              else grade = "BASIC";
-	              
-	              ps2.setString(1, grade);
-	              ps2.setInt(2, cusNum);
-	             System.out.println( ps2.executeUpdate() + "회원 등급별 업데이트 완료"); 
-	             
-	             isUpdated = true;       	
-	        }
-	        if(!isUpdated)
-	        	throw new RecordNotFoundException("등급을 부여할 회원이 없습니다.");
-	        
-		}catch(SQLException e) {
-			throw new DMLException("회원 등굽 부여 중 오류 발생"+ e.getMessage());
-		
-		
-	}finally {
+			ps2 = conn.prepareStatement(updateQuery);
+
+			boolean isUpdated = false;
+
+			while (rs.next()) {
+				int cusNum = rs.getInt("cus_num");
+				int count = rs.getInt("res_count");
+
+				String grade;
+				if (count >= 5)
+					grade = "GOLD";
+				else if (count >= 3)
+					grade = "SILVER";
+				else
+					grade = "BRONZE";
+
+				ps2.setString(1, grade);
+				ps2.setInt(2, cusNum);
+				System.out.println(ps2.executeUpdate() + "회원 등급별 업데이트 완료");
+
+				isUpdated = true;
+			}
+			if (!isUpdated)
+				throw new RecordNotFoundException("등급을 부여할 회원이 없습니다.");
+
+		} catch (SQLException e) {
+			throw new DMLException("회원 등굽 부여 중 오류 발생" + e.getMessage());
+
+		} finally {
 			closeAll(rs, ps, conn);
 			closeAll(ps2, null);
 		}
-	
+
 	}
 
 	@Override

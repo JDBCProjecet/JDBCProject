@@ -301,11 +301,39 @@ public class CustomerDAOImpl implements CustomerDAO{
 	}
 
 	@Override
-	public int getCustomerGrade(int customerId) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	public int  getDiscountedPrice(int customerId) throws DMLException {
+	    int discountRate = 10; // 기본값 (BRONZE)
+	    Connection conn = null;
+	    PreparedStatement ps = null;
+	    ResultSet rs = null;
 
+	    try {
+	        conn = getConnect(); // 커넥션 메서드
+	        String sql = "SELECT cus_grade FROM customer WHERE cus_num = ?";
+	        ps = conn.prepareStatement(sql);
+	        ps.setInt(1, customerId);
+	        rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            String grade = rs.getString("cus_grade");
+
+	            // 등급 문자열에 따라 할인율 정함
+	            switch (grade.toUpperCase()) {
+	                case "VIP": discountRate = 30; break;
+	                case "GOLD": discountRate = 20; break;
+	                case "SILVER": discountRate = 15; break;
+	                case "BRONZE": default: discountRate = 10; break;
+	            }
+	        }
+
+	    } catch (SQLException e) {
+	        throw new DMLException("할인율 계산중 오류"); // 필요시 로깅
+	    } finally {
+	        closeAll(rs, ps, conn); 
+	    }
+
+	    return discountRate;
+	}
 	@Override
 	public List<GuestHouse> getAllGuestHouses() throws RecordNotFoundException, DMLException {
 		Connection conn = null;

@@ -1,10 +1,14 @@
 package com.gh.test;
 
 import java.sql.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
+import com.gh.dao.GuestHouseDAO;
 import com.gh.dao.impl.CustomerDAOImpl;
 import com.gh.dao.impl.GuestHouseDAOImpl;
+import com.gh.vo.Customer;
 import com.gh.vo.GuestHouse;
 import com.gh.vo.Reservation;
 
