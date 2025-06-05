@@ -140,14 +140,16 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 		PreparedStatement ps = null;
 
 		try {
+			conn = getConnect();
 			if (!isExist(guestHouse.getNum(), conn)) {
-				String query = "INSERT INTO guestHouse(gus_num,gus_name,gus_address, gus_price, gus_capacity) VALUES(?,?,?,?,?)";
+				String query = "INSERT INTO guestHouse(gus_num, gus_name, gus_address, gus_price, gus_capacity, gus_service) VALUES(?,?,?,?,?,?)";
 				ps = conn.prepareStatement(query);
 				ps.setInt(1, guestHouse.getNum());
 				ps.setString(2, guestHouse.getName());
 				ps.setString(3, guestHouse.getAddress());
 				ps.setInt(4, guestHouse.getPrice());
 				ps.setInt(5, guestHouse.getCapacity());
+				ps.setString(6, guestHouse.getService());
 				System.out.println(ps.executeUpdate() + "개 등록성공");
 			} else {
 				throw new DuplicateException(guestHouse.getName() + "은 등록되어 있는 게스트하우스입니다.");
@@ -165,14 +167,17 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 		PreparedStatement ps = null;
 
 		try {
+			conn = getConnect();
+
 			if (isExist(guestHouse.getNum(), conn)) {
-				String query = "UPDATE guestHouse SET gus_name=?, gus_address=?, gus_price=?, gus_capacity=? WHERE gus_num =?";
+				String query = "UPDATE guestHouse SET gus_name=?, gus_address=?, gus_price=?, gus_capacity=?, gus_service=? WHERE gus_num =?";
 				ps = conn.prepareStatement(query);
 				ps.setString(1, guestHouse.getName());
 				ps.setString(2, guestHouse.getAddress());
 				ps.setInt(3, guestHouse.getPrice());
 				ps.setInt(4, guestHouse.getCapacity());
-				ps.setInt(5, guestHouse.getNum());
+				ps.setString(5, guestHouse.getService());
+				ps.setInt(6, guestHouse.getNum());
 				System.out.println(ps.executeUpdate() + "명 수정함");
 			} else {
 				throw new RecordNotFoundException("해당 게하없음");
@@ -199,8 +204,6 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 				ps.setInt(1, guestHouseId);
 
 				System.out.println(ps.executeUpdate() + "명 삭제함");
-				ps.setInt(1, guestHouseId);
-				System.out.println(ps.executeUpdate() + "개 삭제함");
 			} else {
 				throw new RecordNotFoundException("해당 게하없음");
 			}

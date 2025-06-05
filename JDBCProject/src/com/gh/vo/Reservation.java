@@ -1,7 +1,6 @@
 package com.gh.vo;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 
 public class Reservation {
 	private int num;// res_num
