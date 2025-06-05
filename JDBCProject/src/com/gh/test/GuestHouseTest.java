@@ -11,6 +11,7 @@ import com.gh.dao.GuestHouseDAO;
 import com.gh.dao.impl.CustomerDAOImpl;
 import com.gh.dao.impl.GuestHouseDAOImpl;
 import com.gh.exception.DMLException;
+import com.gh.exception.DuplicateException;
 import com.gh.exception.RecordNotFoundException;
 import com.gh.vo.Customer;
 import com.gh.vo.GuestHouse;
@@ -226,27 +227,39 @@ public class GuestHouseTest implements Runnable {
 
     // ===================== 관리자 기능 구현 =====================
     public static void assignMembership() {
-        System.out.print("회원 ID: ");
-        String id = scanner.nextLine();
-        System.out.print("등급 입력 (Silver/Gold/VIP): ");
-        String grade = scanner.nextLine();
-        userGrades.put(id, grade);
-        System.out.println("등급 부여 완료.");
+        try {
+            gdao.assignCustomerGrades();
+            System.out.println("등급 부여 완료.");
+        } catch (RecordNotFoundException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		} 
     }
 
     public static void registerGuestHouse() {
-        System.out.print("등록할 숙소명: ");
-        String name = scanner.nextLine();
-        guestHouses.add(name);
-        System.out.println("등록 완료.");
+    	try {
+    		System.out.println("추가할 게스트 하우스의 데이터를 입력하십시오.");
+    		int guestHouseId = scanner.nextInt();    		
+    		String guestHouseName = scanner.next();
+    		String guestHouseAddress = scanner.next();
+    		int guestHousePrice = scanner.nextInt();
+    		int guestHouseCapacity = scanner.nextInt();
+    		String guestHouseService = scanner.next();
+    		
+    		GuestHouse updateGH = new GuestHouse(guestHouseId, guestHouseName, guestHouseAddress, guestHousePrice, guestHouseCapacity, guestHouseService);
+    		
+    		gdao.registerGuestHouse(updateGH);
+		}
+    	 catch (DuplicateException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		}
     }
 
     public static void updateGuestHouse() {
     	try {
-    		System.out.println("수정할 방의 아이디를 입력하십시오.");
+    		System.out.println("수정할 게스트하우스의 아이디를 입력하십시오.");
     		int guestHouseId = scanner.nextInt();
     		
-    		System.out.println("방을 수정할 데이터를 입력하십시오.");
+    		System.out.println("게스트하우스를 수정할 데이터를 입력하십시오.");
     		String guestHouseName = scanner.next();
     		String guestHouseAddress = scanner.next();
     		int guestHousePrice = scanner.nextInt();
@@ -263,7 +276,7 @@ public class GuestHouseTest implements Runnable {
 
     public static void deleteGuestHouse() {
     	try {
-    		System.out.println("삭제할 방의 아이디를 입력하십시오.");
+    		System.out.println("삭제할 게스트하우스의 아이디를 입력하십시오.");
     		int guestHouseId = scanner.nextInt();
     		gdao.deleteGuestHouse(guestHouseId);
 		}
