@@ -45,7 +45,6 @@ public class UnitTest implements Runnable {
 
 //			System.out.println(gdao.getUsageStatsByDate());
 			System.out.println(gdao.getSalesStatsByDate());
-
 		}catch(Exception e) {
 			e.printStackTrace();
 		}

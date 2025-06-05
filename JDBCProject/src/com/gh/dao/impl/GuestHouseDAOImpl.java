@@ -229,7 +229,7 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 					SELECT res_cindate, SUM(res_tpeople) AS total_people 
 					FROM reservation 
 					GROUP BY res_cindate 
-					ORDER BY res_cindate
+					ORDER BY 1
 					""";
 			ps=conn.prepareStatement(sql);
 			rs=ps.executeQuery();
@@ -257,11 +257,16 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 		
 		try {
 			conn = getConnect();
-			String sql = "res_cindate, SUM(res_tprice) AS total_price FROM reservation GROUP BY res_cindate ORDER BY 1";
+			String sql = """
+					SELECT res_cindate, SUM(res_tprice) AS total_price 
+					FROM reservation 
+					GROUP BY res_cindate 
+					ORDER BY 1
+					""";
 			ps=conn.prepareStatement(sql);
 			rs=ps.executeQuery();
 			while (rs.next()) {
-			    String day = rs.getString("ymd");
+			    String day = rs.getString("res_cindate");
 			    int totalPeople = rs.getInt("total_price");
 			    salesByDay.put(day, totalPeople);
 			}
@@ -285,17 +290,16 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 			String sql = """
 				    SELECT gus_num, gus_name, total_price, 
 			           RANK() OVER (ORDER BY total_price DESC) AS ranking
-			    FROM (
-			        SELECT gus_num, g.gus_name, SUM(r.res_tprice) AS total_price
-			        FROM reservation r
-			        JOIN guesthouse g USING(gus_num)
-			        GROUP BY g.gus_num, g.gus_name
-			    ) AS ranked
-			    """;
+					FROM ( SELECT gus_num, g.gus_name, SUM(r.res_tprice) AS total_price
+					      	FROM reservation r
+					      	JOIN guesthouse g USING(gus_num)
+					      	GROUP BY g.gus_num, g.gus_name
+					  	) AS ranked
+					  	""";
 			ps=conn.prepareStatement(sql);
 			rs=ps.executeQuery();
 			while (rs.next()) {
-				ghRank.put(rs.getString("ranking"),new GuestHouse(rs.getString("gus_name"),rs.getInt("total_price")));
+				ghRank.put(rs.getString("ranking")+"등",new GuestHouse(rs.getString("gus_name"),rs.getInt("total_price")));
 			  
 			}
 		}catch(SQLException e){
