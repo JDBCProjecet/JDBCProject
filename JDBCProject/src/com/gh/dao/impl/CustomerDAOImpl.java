@@ -98,6 +98,134 @@ public class CustomerDAOImpl implements CustomerDAO{
 		
 		return totalPrice;
 	}
+	
+	/**
+	 * 방이 해당 날짜간에 비어있는지 확인하는 함수
+	 * @param checkInDate
+	 * @param checkOutDate
+	 * @param totalPeople
+	 * @param conn
+	 * @return
+	 * @throws DMLException 
+	 */
+	private boolean isRoomAble(int gusNum, LocalDate checkInDate, LocalDate checkOutDate, int totalPeople, Connection conn) throws DMLException {
+		LocalDate date = checkInDate;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			String query = """
+					WITH RECURSIVE calendar AS (
+						SELECT MIN(res_cindate) AS res_date
+						FROM reservation
+						UNION ALL
+						SELECT DATE_ADD(res_date, INTERVAL 1 DAY)
+						FROM calendar
+						WHERE res_date < (SELECT MAX(res_coutdate) FROM reservation)
+					)
+					SELECT c.res_date, r.gus_num, SUM(r.res_tpeople) AS total_people
+					FROM calendar c
+					JOIN reservation r
+					ON c.res_date >= r.res_cindate AND c.res_date < r.res_coutdate AND r.gus_num=?
+					GROUP BY c.res_date, r.gus_num
+					ORDER BY c.res_date, r.gus_num;
+					""";
+			
+			ps = conn.prepareStatement(query);
+			ps.setInt(1, gusNum);
+			rs = ps.executeQuery();
+			
+			Map<LocalDate, Integer> datePeopleMap = new HashMap<LocalDate, Integer>();
+			while (rs.next()) {
+				datePeopleMap.put(rs.getDate("c.res_date").toLocalDate(), rs.getInt("total_people"));
+			}
+			
+			query = "SELECT gus_capacity FROM guesthouse WHERE gus_num=?";
+			ps = conn.prepareStatement(query);
+			ps.setInt(1, gusNum);
+			rs = ps.executeQuery();
+			
+			int capacity = 0;
+			if (rs.next()) {
+				capacity = rs.getInt("gus_capacity");
+			}
+			
+			while (date.isEqual(checkOutDate) || date.isBefore(checkOutDate)) {	
+				System.out.println(date);
+				if (totalPeople > capacity || (datePeopleMap.get(date) != null && (datePeopleMap.get(date) + totalPeople) > capacity)) { // 방이 꽉찬 날이 있다면 false를 리턴
+					System.out.println(date + "에는 수용량을 초과합니다.");
+					return false;
+				}
+				
+				date = date.plusDays(1);
+			}
+			
+			return true;
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		} finally {
+			closeAll(rs, ps, null);
+		}
+		
+		return true;
+	}
+
+	/**
+	 * 고객이 존재하는지 확인하는 함수
+	 * @param num
+	 * @param conn
+	 * @return
+	 * @throws DMLException 
+	 */
+	private boolean isCusExist(int cusNum, Connection conn) throws DMLException {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			String query = "SELECT * FROM customer WHERE cus_num=?";
+			
+			ps = conn.prepareStatement(query);
+			ps.setInt(1, cusNum);
+			rs = ps.executeQuery();
+			
+			return rs.next();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		} finally {
+			closeAll(rs, ps, null);
+		}
+		
+		return true;
+	}
+
+	/**
+	 * 게스트하우스가 존재하는지 확인하는 함수
+	 * @param num
+	 * @param conn
+	 * @return
+	 * @throws DMLException 
+	 */
+	private boolean isGHExist(int gusNum, Connection conn) throws DMLException {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		try {
+			String query = "SELECT gus_num, gus_name FROM guesthouse WHERE gus_num=?";
+			
+			ps = conn.prepareStatement(query);
+			ps.setInt(1, gusNum);
+			rs = ps.executeQuery();
+			
+			return rs.next();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			closeAll(rs, ps, null);
+		}
+		
+		return true;
+	}
 
 	// 비즈니스 로직
 	@Override
@@ -521,4 +649,43 @@ public class CustomerDAOImpl implements CustomerDAO{
 		
 		return price;
 	}
+
+	//제주 부산 강원 서울 경기 충북 충남 경북 경남 전북 전남 의 지역의 게스트하우스 검색
+		@Override
+		public List<GuestHouse> getRegionGuestHouse(String region) throws RecordNotFoundException, DMLException{
+			Connection conn = null;
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+			List<GuestHouse> RegionGuestHouse = new ArrayList<>();
+			
+			try {
+				conn = getConnect();
+				String query = """
+						SELECT gus_num, gus_name, gus_address, gus_price, gus_capacity, gus_service 
+						FROM guestHouse
+						WHERE substr(gus_address,1,2) = ?
+						""";
+				ps=conn.prepareStatement(query);
+				ps.setString(1, region);
+				rs=ps.executeQuery();
+				while(rs.next()) {
+					RegionGuestHouse.add(new GuestHouse(
+							   rs.getInt("gus_num"),
+				                rs.getString("gus_name"),
+				                rs.getString("gus_address"),
+				                rs.getInt("gus_price"),
+				                rs.getInt("gus_capacity"),
+				                rs.getString("gus_service")
+				            ));
+				}
+				if(RegionGuestHouse.isEmpty()) {
+					throw new RecordNotFoundException();
+				}
+			}catch(SQLException e) {
+				throw new DMLException();
+			}finally{
+				closeAll(rs,ps,conn);
+			}
+			return RegionGuestHouse;
+		}
 }

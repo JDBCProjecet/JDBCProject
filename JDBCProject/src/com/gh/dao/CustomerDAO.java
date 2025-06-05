@@ -45,7 +45,7 @@ public interface CustomerDAO {
 	public List<GuestHouse> getAllGuestHouses()throws RecordNotFoundException, DMLException;
 
 	// 11. 게스트하우스 남은 인원 확인
-	public int getRemainingCapacity(int gusNum, Date date)throws RecordNotFoundException, DMLException;
+	public String getRemainingCapacity(int gusNum, Date date)throws RecordNotFoundException, DMLException;
 
 	// 12. 게스트하우스 특성 조건 검색
 	public List<GuestHouse> getGuestHouses(String service)throws RecordNotFoundException, DMLException;
