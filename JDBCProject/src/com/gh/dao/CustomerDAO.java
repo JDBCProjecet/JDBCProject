@@ -23,7 +23,7 @@ public interface CustomerDAO {
 	public void deleteCustomer(int customerId)throws RecordNotFoundException, DMLException;
 
 	// 4. 예약하기
-	public void addReservation(Reservation reservation)throws DuplicateException, DMLException;
+	public void addReservation(Reservation reservation)throws DuplicateException, DMLException, RecordNotFoundException;
 
 	// 5. 예약 수정
 	public void updateReservation(Reservation reservation)throws RecordNotFoundException, DMLException;

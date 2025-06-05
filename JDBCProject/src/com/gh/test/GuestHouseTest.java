@@ -1,6 +1,7 @@
 package com.gh.test;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -123,107 +124,288 @@ public class GuestHouseTest implements Runnable {
             scanner.nextLine();
 
             switch (input) {
-                case 1 -> assignMembership();
-                case 2 -> registerGuestHouse();
-                case 3 -> updateGuestHouse();
-                case 4 -> deleteGuestHouse();
-                case 5 -> reservationStats();
-                case 6 -> salesStats();
-                case 0 -> { return; }
-                default -> System.out.println("잘못된 입력입니다.");
+                case 1:
+                	assignMembership();
+                	break;
+                case 2:
+                	registerGuestHouse();
+                	break;
+                case 3:
+                	updateGuestHouse();
+                	break;
+                case 4:
+                	deleteGuestHouse();
+                	break;
+                case 5:
+                	reservationStats();
+                	break;
+                case 6:
+                	salesStats();
+                	break;
+                case 0:
+                	return;
+                default:
+                	System.out.println("잘못된 입력입니다.");
             }
         }
     }
 
     // ===================== 고객 기능 구현 =====================
     public static void signUp() {
-        System.out.print("회원 ID: ");
-        String id = scanner.nextLine();
-        System.out.print("비밀번호: ");
-        String pw = scanner.nextLine();
-        users.put(id, pw);
-        System.out.println("회원가입 완료.");
+        try {
+        	System.out.println("가입정보 입력");
+        	
+        	int num = scanner.nextInt();
+    		String name = scanner.next();
+    		String address = scanner.next();
+    		String ssn = scanner.next();
+    		char gender = (char) scanner.nextInt();
+    		String phone = scanner.next();
+    		String grade = scanner.next();
+        	
+        	Customer customer = new Customer(num, name, address, ssn, gender, phone, grade, new ArrayList<Reservation>());
+        	
+            cdao.registerCustomer(customer);
+            System.out.println("회원가입 완료.");
+		}
+    	 catch (DuplicateException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		}
     }
 
     public static void updateUserInfo() {
-        System.out.print("변경할 회원 ID: ");
-        String id = scanner.nextLine();
-        if (!users.containsKey(id)) {
-            System.out.println("존재하지 않는 ID입니다.");
-            return;
-        }
-        System.out.print("새 비밀번호: ");
-        String newPw = scanner.nextLine();
-        users.put(id, newPw);
-        System.out.println("비밀번호 변경 완료.");
+    	try {
+        	System.out.println("수정할 정보 입력");
+        	
+        	int num = scanner.nextInt();
+    		String name = scanner.next();
+    		String address = scanner.next();
+    		String ssn = scanner.next();
+    		char gender = (char) scanner.nextInt();
+    		String phone = scanner.next();
+    		String grade = scanner.next();
+        	
+        	Customer customer = new Customer(num, name, address, ssn, gender, phone, grade, new ArrayList<Reservation>());
+        	
+            cdao.updateCustomer(customer);
+            System.out.println("회원 수정 완료");
+		}
+    	 catch (RecordNotFoundException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		}
     }
 
     public static void deleteUser() {
-        System.out.print("탈퇴할 회원 ID: ");
-        String id = scanner.nextLine();
-        users.remove(id);
-        System.out.println("회원 탈퇴 완료.");
+    	try {
+        	System.out.println("삭제할 회원번호 입력");
+        	
+        	int num = scanner.nextInt();
+            cdao.deleteCustomer(num);
+            
+            System.out.println("회원가입 완료.");
+		}
+    	 catch (RecordNotFoundException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		}
     }
 
     public static void makeReservation() {
-        System.out.print("예약자 이름: ");
-        String name = scanner.nextLine();
-        System.out.print("숙소명: ");
-        String house = scanner.nextLine();
-        String res = name + "님의 예약 - " + house;
-        reservations.add(res);
-        System.out.println("예약 완료: " + res);
+    	try {
+        	System.out.println("가입정보 입력");
+        	
+        	// public Reservation(int num, int gusNum, int cusNum, LocalDate checkInDate, LocalDate checkOutDate, int totalPrice, int totalPeople)
+        	
+        	int num = scanner.nextInt();
+    		int gusNum = scanner.nextInt();
+    		int cusNum = scanner.nextInt();
+    		LocalDate checkInDate = LocalDate.of(scanner.nextInt(), scanner.nextInt(), scanner.nextInt());
+    		LocalDate checkOutDate = LocalDate.of(scanner.nextInt(), scanner.nextInt(), scanner.nextInt());
+    		//int cusNum = scanner.nextInt();
+    		int people = scanner.nextInt();
+        	
+        	Reservation reservation = new Reservation(num, gusNum, cusNum, checkInDate, checkOutDate, 0, people);
+        	
+            cdao.addReservation(reservation);
+            System.out.println("예약 추가 완료");
+		}
+    	 catch (RecordNotFoundException | DuplicateException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		}
     }
 
     public static void viewReservation() {
-        System.out.println("예약 목록:");
-        for (String res : reservations) {
-            System.out.println("- " + res);
-        }
+    	try {
+        	System.out.println("가입정보 입력");
+        	
+        	int num = scanner.nextInt();
+    		String name = scanner.next();
+    		String address = scanner.next();
+    		String ssn = scanner.next();
+    		char gender = (char) scanner.nextInt();
+    		String phone = scanner.next();
+        	
+        	Customer customer = new Customer(num, name, address, ssn, gender, phone, "Bronze", new ArrayList<Reservation>());
+        	
+            cdao.registerCustomer(customer);
+            System.out.println("회원가입 완료.");
+		}
+    	 catch (RecordNotFoundException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		}
     }
 
     public static void cancelReservation() {
-        System.out.print("취소할 예약자 이름: ");
-        String name = scanner.nextLine();
-        reservations.removeIf(r -> r.startsWith(name));
-        System.out.println("예약 취소 완료.");
+    	try {
+        	System.out.println("가입정보 입력");
+        	
+        	int num = scanner.nextInt();
+    		String name = scanner.next();
+    		String address = scanner.next();
+    		String ssn = scanner.next();
+    		char gender = (char) scanner.nextInt();
+    		String phone = scanner.next();
+        	
+        	Customer customer = new Customer(num, name, address, ssn, gender, phone, "Bronze", new ArrayList<Reservation>());
+        	
+            cdao.registerCustomer(customer);
+            System.out.println("회원가입 완료.");
+		}
+    	 catch (RecordNotFoundException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		}
     }
 
     public static void modifyReservation() {
-        System.out.print("변경할 예약자 이름: ");
-        String name = scanner.nextLine();
-        reservations.removeIf(r -> r.startsWith(name));
-        System.out.print("새 숙소명: ");
-        String newHouse = scanner.nextLine();
-        reservations.add(name + "님의 예약 - " + newHouse);
-        System.out.println("예약 변경 완료.");
+    	try {
+        	System.out.println("가입정보 입력");
+        	
+        	int num = scanner.nextInt();
+    		String name = scanner.next();
+    		String address = scanner.next();
+    		String ssn = scanner.next();
+    		char gender = (char) scanner.nextInt();
+    		String phone = scanner.next();
+        	
+        	Customer customer = new Customer(num, name, address, ssn, gender, phone, "Bronze", new ArrayList<Reservation>());
+        	
+            cdao.registerCustomer(customer);
+            System.out.println("회원가입 완료.");
+		}
+    	 catch (RecordNotFoundException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		}
     }
 
     public static void writeReview() {
-        System.out.print("후기를 작성할 숙소명: ");
-        String house = scanner.nextLine();
-        System.out.print("후기 내용: ");
-        String review = scanner.nextLine();
-        System.out.println("후기 저장 완료: [" + house + "] " + review);
+    	try {
+        	System.out.println("가입정보 입력");
+        	
+        	int num = scanner.nextInt();
+    		String name = scanner.next();
+    		String address = scanner.next();
+    		String ssn = scanner.next();
+    		char gender = (char) scanner.nextInt();
+    		String phone = scanner.next();
+        	
+        	Customer customer = new Customer(num, name, address, ssn, gender, phone, "Bronze", new ArrayList<Reservation>());
+        	
+            cdao.registerCustomer(customer);
+            System.out.println("회원가입 완료.");
+		}
+    	 catch (RecordNotFoundException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		}
     }
 
     public static void viewPromotion() {
-        System.out.println("등급별 할인 안내:");
-        System.out.println("Silver: 5%, Gold: 10%, VIP: 15%");
+    	try {
+        	System.out.println("가입정보 입력");
+        	
+        	int num = scanner.nextInt();
+    		String name = scanner.next();
+    		String address = scanner.next();
+    		String ssn = scanner.next();
+    		char gender = (char) scanner.nextInt();
+    		String phone = scanner.next();
+        	
+        	Customer customer = new Customer(num, name, address, ssn, gender, phone, "Bronze", new ArrayList<Reservation>());
+        	
+            cdao.registerCustomer(customer);
+            System.out.println("회원가입 완료.");
+		}
+    	 catch (RecordNotFoundException | DMLException e) {
+ 			System.out.println(e.getMessage());
+ 		}
     }
 
     public static void userSearchMenu() {
-        System.out.println("\n--- 조회 기능 ---");
-        System.out.println("1. 지역별 조회");
-        System.out.println("2. 남은 인원수 조회");
-        System.out.println("3. 특별룸 조회");
-        System.out.println("4. 전체 조회");
-        System.out.println("5. 요일/가격 기준 조회");
+        while (true) {
+            System.out.println("\n--- 조회 기능 ---");
+            System.out.println("1. 지역별 조회");
+            System.out.println("2. 남은 인원수 조회");
+            System.out.println("3. 특별룸 조회");
+            System.out.println("4. 전체 조회");
+            System.out.println("5. 요일/가격 기준 조회");
+            System.out.println("0. 뒤로가기");
 
-        int input = scanner.nextInt();
-        scanner.nextLine();
-        System.out.println("해당 조건에 맞는 숙소 조회 결과 (모의 출력)");
+            int input = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (input) {
+                case 1 -> {
+                    System.out.print("조회할 지역을 입력하세요 (예: 서울): ");
+                    String region = scanner.nextLine();
+                    guestHouses.stream()
+                        .filter(s -> s.startsWith(region + "/"))
+                        .forEach(System.out::println);
+                }
+
+                case 2 -> {
+                    System.out.print("최소 남은 인원수를 입력하세요: ");
+                    int min = scanner.nextInt();
+                    scanner.nextLine();
+                    guestHouses.stream()
+                        .filter(s -> {
+                            String[] tokens = s.split("/");
+                            int remaining = Integer.parseInt(tokens[2]);
+                            return remaining >= min;
+                        })
+                        .forEach(System.out::println);
+                }
+
+                case 3 -> {
+                    guestHouses.stream()
+                        .filter(s -> s.contains("/true/"))
+                        .forEach(System.out::println);
+                }
+
+                case 4 -> {
+                    guestHouses.forEach(System.out::println);
+                }
+
+                case 5 -> {
+                    System.out.print("최대 가격을 입력하세요: ");
+                    int maxPrice = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("요일을 입력하세요 (예: 금): ");
+                    String day = scanner.nextLine();
+                    guestHouses.stream()
+                        .filter(s -> {
+                            String[] tokens = s.split("/");
+                            int price = Integer.parseInt(tokens[4]);
+                            String dow = tokens[5];
+                            return price <= maxPrice && dow.equals(day);
+                        })
+                        .forEach(System.out::println);
+                }
+
+                case 0 -> { return; }
+
+                default -> System.out.println("잘못된 입력입니다.");
+            }
+        }
     }
+    
 
     // ===================== 관리자 기능 구현 =====================
     public static void assignMembership() {
