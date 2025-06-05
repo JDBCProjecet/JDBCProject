@@ -1,6 +1,7 @@
 package com.gh.test;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -14,27 +15,31 @@ import com.gh.vo.Reservation;
 
 
 public class UnitTest implements Runnable {
+	static CustomerDAOImpl cdao = CustomerDAOImpl.getInstance();
+	static GuestHouseDAOImpl gdao = GuestHouseDAOImpl.getInstance();
+	static Scanner sc = new Scanner(System.in);
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 //		UnitTest test = new UnitTest();
 //		Thread t = new Thread(test);
 //		t.start();
-		CustomerDAOImpl cdao = CustomerDAOImpl.getInstance();
-		GuestHouseDAOImpl gdao = GuestHouseDAOImpl.getInstance();
-		Scanner scan = new Scanner(System.in);
 		
 		boolean flag = true;
 		//Customer(int num, String name, String address, String ssn, char gender, String phone, String grade) {
 		//public GuestHouse(int num, String serviceName, String name, String address, int price, int capacity)
 		//Reservation(int num, String serviceName, int cusNum, Date checkInDate, Date checkOutDate, int totalPrice,	int totalPeople
+		
+		boolean isRunning = true;
 	
 		try {
 //			cdao.registerCustomer(new Customer(2,"이름","주소","999",'남',"010","bronze"));
 //			cdao.updateCustomer(new Customer(2,"수정","주소","999",'남',"010","bronze"));
 //			cdao.deleteCustomer(2);
+//			gdao.registerGuestHouse(new GuestHouse(1,"파티","게하1","서울시 강남구 논현동",100000,10));
+//			gdao.updateGuestHouse(new GuestHouse(1,"파티","게하2","서울시 강남구 논현동",100000,10));
+//			gdao.deleteGuestHouse(1);
+			// (int num, int gusNum, int cusNum, LocalDate checkInDate, LocalDate checkOutDate, int totalPrice,	int totalPeople)
+			cdao.addReservation(new Reservation(13, 2, 1, LocalDate.of(2025, 7, 10), LocalDate.of(2025, 7, 15), 0, 50));
 //			gdao.registerGuestHouse(new GuestHouse(11,"게하4","서울시 강남구 논현동",100000,5,"파티"));
 //			gdao.updateGuestHouse(new GuestHouse(11,"게하10","서울시 강남구 논현동",100000,10,"파티"));
 //			gdao.deleteGuestHouse(9);
@@ -50,16 +55,50 @@ public class UnitTest implements Runnable {
 			
 //			System.out.println(gdao.getUsageStatsByDate());
 
-		}catch(Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static void adminMenu() {
+		boolean isRunning = true;
+		
+		try {
+			while (isRunning) {
+
+				
+				System.out.println("해당하는 메뉴를 선택하십시오.");
+				System.out.println("1. 관리자 메뉴");
+				System.out.println("2. 고객 메뉴");
+				System.out.println("3. 종료");
+				switch (sc.nextInt()) {
+				case 1:
+					// 관리자 메뉴
+					break;
+				case 2:
+					// 고객 메뉴
+					break;
+				case 3:
+					isRunning = false;
+					break;
+				default:
+					System.out.println("1, 2 중 하나를 눌러 주십시오.");
+				
+				}
+			}
+			
+		} catch(Exception e) {
+			System.out.println(e.getMessage());
 		}
 		
 		
-		
-		
-		
+		return;
 	}
 	
+
+	/**
+	 * 무한루프를 돌면서 전체 예약테이블의 정보를 가져옴
+	 */
 	@Override
 	public void run() {
 		while (true) {// 무한 루핑을 돌면서 작업을 하도록...
