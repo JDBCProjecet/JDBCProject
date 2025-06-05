@@ -540,7 +540,7 @@ public class GuestHouseTest implements Runnable {
             System.out.println("\n--- 매출 통계 기능 ---");
             System.out.println("1. 날짜 별 총 매출 조회");
             System.out.println("2. 게스트하우스 별 매출등급 조회");
-            System.out.println("3. 상위 매출 Top 3 조회");
+            System.out.println("3. 상위 매출 Top 5 조회");
             System.out.println("0. 뒤로가기");
 
             try {
@@ -556,7 +556,7 @@ public class GuestHouseTest implements Runnable {
                     	mapSalesTotal.forEach((name, gh) -> System.out.println(name + " : " + gh));
                 		break;
                     case 3:
-                    	Map<String, GuestHouse> mapTop5 = gdao.getTop5GHByRevenue();
+                    	Map<String, String> mapTop5 = gdao.getTop5GHByRevenue();
                     	mapTop5.forEach((name, gh) -> System.out.println(name + " : " + gh));
                         break;
                     case 0:
