@@ -36,7 +36,7 @@ public class GuestHouseDAOImpl implements GuestHouseDAO {
 
 	public Connection getConnect() throws SQLException {
 		Connection conn = DriverManager.getConnection(ServerInfo.URL, ServerInfo.USER, ServerInfo.PASS);
-		System.out.println("------데이타베이스 뚜뚜뚜-----");
+		System.out.println("------DataBase Connecting-----");
 		return conn;
 	}
 
