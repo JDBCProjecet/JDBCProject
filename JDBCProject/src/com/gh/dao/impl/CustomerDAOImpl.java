@@ -87,7 +87,7 @@ public class CustomerDAOImpl implements CustomerDAO{
 	}
 	
 	/// 숙박기간동안 총 가격 구하는 함수
-	private int totalPrice(int guestHouseNum, LocalDate checkInDate, LocalDate checkOutDate) throws RecordNotFoundException, DMLException {
+	private int totalPrice(int guestHouseNum, int customerNum, LocalDate checkInDate, LocalDate checkOutDate) throws RecordNotFoundException, DMLException {
 		int totalPrice = 0;
 		LocalDate date = checkInDate;
 		
@@ -95,6 +95,8 @@ public class CustomerDAOImpl implements CustomerDAO{
 			totalPrice += calculatePriceByDay(guestHouseNum, date);
 			date.plusDays(1);
 		}
+		
+		totalPrice = totalPrice * (100 - getDiscountedPrice(customerNum)) / 100;
 		
 		return totalPrice;
 	}
@@ -194,7 +196,7 @@ public class CustomerDAOImpl implements CustomerDAO{
 			ps.setInt(3, reservation.getCusNum()); // cus_num
 			ps.setDate(4, Date.valueOf(reservation.getCheckInDate())); // res_cindate
 			ps.setDate(5, Date.valueOf(reservation.getCheckOutDate())); // res_coutdate
-			ps.setInt(6, totalPrice(reservation.getGusNum(), reservation.getCheckInDate(), reservation.getCheckOutDate())); // res_tprice
+			ps.setInt(6, totalPrice(reservation.getGusNum(), reservation.getCusNum(), reservation.getCheckInDate(), reservation.getCheckOutDate())); // res_tprice
 			ps.setInt(7, reservation.getTotalPeople()); // res_tpeople
 			
 			System.out.println("예약 " + ps.executeUpdate() + "건 등록 성공...");
@@ -455,18 +457,18 @@ public class CustomerDAOImpl implements CustomerDAO{
 			
 			if (rs.next()) {
 				price = rs.getInt("price");
-			}
+			}	
+			
+			// 금, 토요일일 경우 추가요금
+			if (date.getDayOfWeek() == DayOfWeek.FRIDAY || date.getDayOfWeek() == DayOfWeek.SATURDAY) {
+				price = price * 12 / 10;
+			}			
 		} catch (SQLIntegrityConstraintViolationException e) {
 			throw new RecordNotFoundException("해당 게스트하우스가 존재하지 않습니다.");
 		} catch (SQLException e) {
 			throw new DMLException("게스트 하우스 가격조회에 실패했습니다.");
 		} finally {
 			closeAll(rs, ps, conn);
-		}
-		
-		// 금, 토요일일 경우 추가요금
-		if (date.getDayOfWeek() == DayOfWeek.FRIDAY || date.getDayOfWeek() == DayOfWeek.SATURDAY) {
-			price = price * 12 / 10;
 		}		
 		
 		return price;
