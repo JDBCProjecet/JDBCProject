@@ -1,6 +1,7 @@
 package com.gh.test;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -37,7 +38,8 @@ public class UnitTest implements Runnable {
 //			gdao.registerGuestHouse(new GuestHouse(1,"파티","게하1","서울시 강남구 논현동",100000,10));
 //			gdao.updateGuestHouse(new GuestHouse(1,"파티","게하2","서울시 강남구 논현동",100000,10));
 //			gdao.deleteGuestHouse(1);
-//			cdao.addReservation(new Reservation(1,"파티",1,new Date(2025,05,24),new Date(2025,05,24),10,5));
+			// (int num, int gusNum, int cusNum, LocalDate checkInDate, LocalDate checkOutDate, int totalPrice,	int totalPeople)
+			cdao.addReservation(new Reservation(13, 2, 1, LocalDate.of(2025, 7, 10), LocalDate.of(2025, 7, 15), 0, 50));
 //			cdao.updateReservation(new Reservation(1,"파티",1,new Date(2025,05,24),new Date(2025,05,24),10,6));
 //			cdao.cancelReservation(1);
 //			cdao.getReservation(1).stream().forEach(System.out::println);
