@@ -1,14 +1,10 @@
 package com.gh.test;
 
-import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import com.gh.dao.GuestHouseDAO;
 import com.gh.dao.impl.CustomerDAOImpl;
 import com.gh.dao.impl.GuestHouseDAOImpl;
 import com.gh.exception.DMLException;
@@ -153,189 +149,177 @@ public class GuestHouseTest implements Runnable {
     // ===================== 고객 기능 구현 =====================
     public static void signUp() {
         try {
-        	System.out.println("가입정보 입력");
-        	
-        	int num = scanner.nextInt();
-    		String name = scanner.next();
-    		String address = scanner.next();
-    		String ssn = scanner.next();
-    		char gender = (char) scanner.nextInt();
-    		String phone = scanner.next();
-    		String grade = scanner.next();
-        	
-        	Customer customer = new Customer(num, name, address, ssn, gender, phone, grade, new ArrayList<Reservation>());
-        	
-            cdao.registerCustomer(customer);
-            System.out.println("회원가입 완료.");
-		}
-    	 catch (DuplicateException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+            System.out.println("[회원가입]");
+
+            System.out.print("회원번호: ");
+            int num = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("이름: ");
+            String name = scanner.nextLine();
+
+            System.out.print("주소: ");
+            String address = scanner.nextLine();
+
+            System.out.print("주민번호(######-#######): ");
+            String ssn = scanner.nextLine();
+
+            System.out.print("성별(M/F): ");
+            char gender = scanner.nextLine().toUpperCase().charAt(0);
+
+            System.out.print("전화번호(010-xxxx-xxxx): ");
+            String phone = scanner.nextLine();
+
+            System.out.print("등급(BRONZE/GOLD/SILVER): ");
+            String grade = scanner.nextLine();
+
+            Customer c = new Customer(num, name, address, ssn, gender, phone, grade);
+            cdao.registerCustomer(c);
+        } catch (Exception e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
     public static void updateUserInfo() {
-    	try {
-        	System.out.println("수정할 정보 입력");
-        	
-        	int num = scanner.nextInt();
-    		String name = scanner.next();
-    		String address = scanner.next();
-    		String ssn = scanner.next();
-    		char gender = (char) scanner.nextInt();
-    		String phone = scanner.next();
-    		String grade = scanner.next();
-        	
-        	Customer customer = new Customer(num, name, address, ssn, gender, phone, grade, new ArrayList<Reservation>());
-        	
-            cdao.updateCustomer(customer);
-            System.out.println("회원 수정 완료");
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.println("[회원정보 수정]");
+            System.out.print("회원번호: ");
+            int num = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("이름: ");
+            String name = scanner.nextLine();
+
+            System.out.print("주소: ");
+            String address = scanner.nextLine();
+
+            System.out.print("주민번호: ");
+            String ssn = scanner.nextLine();
+
+            System.out.print("성별(M/F): ");
+            char gender = scanner.nextLine().toUpperCase().charAt(0);
+
+            System.out.print("전화번호: ");
+            String phone = scanner.nextLine();
+
+            System.out.print("등급: ");
+            String grade = scanner.nextLine();
+
+            Customer c = new Customer(num, name, address, ssn, gender, phone, grade);
+            cdao.updateCustomer(c);
+        } catch (Exception e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
     public static void deleteUser() {
-    	try {
-        	System.out.println("삭제할 회원번호 입력");
-        	
-        	int num = scanner.nextInt();
+        try {
+            System.out.print("[회원 탈퇴] 회원번호 입력: ");
+            int num = Integer.parseInt(scanner.nextLine());
+
             cdao.deleteCustomer(num);
-            
-            System.out.println("회원가입 완료.");
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        } catch (Exception e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
+
 
     public static void makeReservation() {
-    	try {
-        	System.out.println("가입정보 입력");
-        	
-        	// public Reservation(int num, int gusNum, int cusNum, LocalDate checkInDate, LocalDate checkOutDate, int totalPrice, int totalPeople)
-        	
-        	int num = scanner.nextInt();
-    		int gusNum = scanner.nextInt();
-    		int cusNum = scanner.nextInt();
-    		LocalDate checkInDate = LocalDate.of(scanner.nextInt(), scanner.nextInt(), scanner.nextInt());
-    		LocalDate checkOutDate = LocalDate.of(scanner.nextInt(), scanner.nextInt(), scanner.nextInt());
-    		//int cusNum = scanner.nextInt();
-    		int people = scanner.nextInt();
-        	
-        	Reservation reservation = new Reservation(num, gusNum, cusNum, checkInDate, checkOutDate, 0, people);
-        	
-            cdao.addReservation(reservation);
-            System.out.println("예약 추가 완료");
-		}
-    	 catch (RecordNotFoundException | DuplicateException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.println("[예약 등록]");
+
+            System.out.print("예약번호: ");
+            int resNum = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("고객번호: ");
+            int cusNum = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("게스트하우스번호: ");
+            int gusNum = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("입실일 (YYYY-MM-DD): ");
+            LocalDate checkIn = LocalDate.parse(scanner.nextLine());
+
+            System.out.print("퇴실일 (YYYY-MM-DD): ");
+            LocalDate checkOut = LocalDate.parse(scanner.nextLine());
+
+            System.out.print("총 인원수: ");
+            int people = Integer.parseInt(scanner.nextLine());
+
+            Reservation r = new Reservation(resNum, gusNum, cusNum, checkIn, checkOut, 0, people);
+            cdao.addReservation(r);
+
+        } catch (Exception e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
+
     public static void viewReservation() {
-    	try {
-        	System.out.println("가입정보 입력");
-        	
-        	int num = scanner.nextInt();
-    		String name = scanner.next();
-    		String address = scanner.next();
-    		String ssn = scanner.next();
-    		char gender = (char) scanner.nextInt();
-    		String phone = scanner.next();
-        	
-        	Customer customer = new Customer(num, name, address, ssn, gender, phone, "Bronze", new ArrayList<Reservation>());
-        	
-            cdao.registerCustomer(customer);
-            System.out.println("회원가입 완료.");
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.print("고객 번호 입력: ");
+            int num = Integer.parseInt(scanner.nextLine());
+
+            for (Reservation r : cdao.getReservation(num)) {
+                System.out.println(r);
+            }
+        } catch (Exception e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
     public static void cancelReservation() {
-    	try {
-        	System.out.println("가입정보 입력");
-        	
-        	int num = scanner.nextInt();
-    		String name = scanner.next();
-    		String address = scanner.next();
-    		String ssn = scanner.next();
-    		char gender = (char) scanner.nextInt();
-    		String phone = scanner.next();
-        	
-        	Customer customer = new Customer(num, name, address, ssn, gender, phone, "Bronze", new ArrayList<Reservation>());
-        	
-            cdao.registerCustomer(customer);
-            System.out.println("회원가입 완료.");
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.print("취소할 예약번호 입력: ");
+            int resNum = Integer.parseInt(scanner.nextLine());
+
+            cdao.cancelReservation(resNum);
+        } catch (Exception e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
     public static void modifyReservation() {
-    	try {
-        	System.out.println("가입정보 입력");
-        	
-        	int num = scanner.nextInt();
-    		String name = scanner.next();
-    		String address = scanner.next();
-    		String ssn = scanner.next();
-    		char gender = (char) scanner.nextInt();
-    		String phone = scanner.next();
-        	
-        	Customer customer = new Customer(num, name, address, ssn, gender, phone, "Bronze", new ArrayList<Reservation>());
-        	
-            cdao.registerCustomer(customer);
-            System.out.println("회원가입 완료.");
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.print("변경할 예약번호 입력: ");
+            int resNum = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("게스트하우스번호: ");
+            int gusNum = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("고객번호: ");
+            int cusNum = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("입실일 (YYYY-MM-DD): ");
+            LocalDate checkIn = LocalDate.parse(scanner.nextLine());
+
+            System.out.print("퇴실일 (YYYY-MM-DD): ");
+            LocalDate checkOut = LocalDate.parse(scanner.nextLine());
+
+            System.out.print("인원수: ");
+            int people = Integer.parseInt(scanner.nextLine());
+
+            Reservation r = new Reservation(resNum, gusNum, cusNum, checkIn, checkOut, 0, people);
+            cdao.updateReservation(r);
+        } catch (Exception e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
+
 
     public static void writeReview() {
-    	try {
-        	System.out.println("가입정보 입력");
-        	
-        	int num = scanner.nextInt();
-    		String name = scanner.next();
-    		String address = scanner.next();
-    		String ssn = scanner.next();
-    		char gender = (char) scanner.nextInt();
-    		String phone = scanner.next();
-        	
-        	Customer customer = new Customer(num, name, address, ssn, gender, phone, "Bronze", new ArrayList<Reservation>());
-        	
-            cdao.registerCustomer(customer);
-            System.out.println("회원가입 완료.");
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        System.out.println("[후기 작성 기능은 현재 준비 중입니다.]");
     }
 
+
     public static void viewPromotion() {
-    	try {
-        	System.out.println("가입정보 입력");
-        	
-        	int num = scanner.nextInt();
-    		String name = scanner.next();
-    		String address = scanner.next();
-    		String ssn = scanner.next();
-    		char gender = (char) scanner.nextInt();
-    		String phone = scanner.next();
-        	
-        	Customer customer = new Customer(num, name, address, ssn, gender, phone, "Bronze", new ArrayList<Reservation>());
-        	
-            cdao.registerCustomer(customer);
-            System.out.println("회원가입 완료.");
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.print("고객번호 입력: ");
+            int id = Integer.parseInt(scanner.nextLine());
+
+            int discount = cdao.getDiscountedPrice(id);
+            System.out.println("고객님의 할인율: " + discount + "%");
+        } catch (Exception e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
     public static void userSearchMenu() {
@@ -343,164 +327,231 @@ public class GuestHouseTest implements Runnable {
             System.out.println("\n--- 조회 기능 ---");
             System.out.println("1. 지역별 조회");
             System.out.println("2. 남은 인원수 조회");
-            System.out.println("3. 특별룸 조회");
+            System.out.println("3. 특별룸 조회 (service가 포함된 게스트하우스)");
             System.out.println("4. 전체 조회");
-            System.out.println("5. 요일/가격 기준 조회");
+            System.out.println("5. 요일/가격 기준 조회 (금/토 추가요금 포함)");
             System.out.println("0. 뒤로가기");
 
-            int input = scanner.nextInt();
-            scanner.nextLine();
+            try {
+                int input = Integer.parseInt(scanner.nextLine());
 
-            switch (input) {
-                case 1 -> {
-                    System.out.print("조회할 지역을 입력하세요 (예: 서울): ");
-                    String region = scanner.nextLine();
-                    guestHouses.stream()
-                        .filter(s -> s.startsWith(region + "/"))
-                        .forEach(System.out::println);
+                switch (input) {
+                    case 1 -> { // 지역별 조회
+                        System.out.print("조회할 지역을 입력하세요 (예: 서울): ");
+                        String region = scanner.nextLine();
+                        List<GuestHouse> list = cdao.getRegionGuestHouse(region);
+                        list.forEach(System.out::println);
+                    }
+
+                    case 2 -> { // 남은 인원수
+                        System.out.print("게스트하우스 번호 입력: ");
+                        int gusNum = Integer.parseInt(scanner.nextLine());
+
+                        System.out.print("날짜 입력 (yyyy-MM-dd): ");
+                        String date = scanner.nextLine();
+
+                        String remain = cdao.getRemainingCapacity(gusNum, java.sql.Date.valueOf(date));
+                        System.out.println("남은 인원/총 정원: " + remain);
+                    }
+
+                    case 3 -> { // 특별룸 조회: 서비스 컬럼 기준
+                        List<GuestHouse> special = cdao.getGuestHouses("party");
+                        special.addAll(cdao.getGuestHouses("breakfast"));
+                        System.out.println("[특별 서비스 제공 게스트하우스]");
+                        special.forEach(System.out::println);
+                    }
+
+                    case 4 -> { // 전체 조회
+                        List<GuestHouse> all = cdao.getAllGuestHouses();
+                        all.forEach(System.out::println);
+                    }
+
+                    case 5 -> { // 요일/가격 기준 조회
+                        System.out.print("최대 가격 입력: ");
+                        int maxPrice = Integer.parseInt(scanner.nextLine());
+
+                        System.out.print("조회할 날짜 입력 (yyyy-MM-dd): ");
+                        LocalDate date = LocalDate.parse(scanner.nextLine());
+
+                        List<GuestHouse> all = cdao.getAllGuestHouses();
+                        for (GuestHouse gh : all) {
+                            int price = cdao.calculatePriceByDay(gh.getNum(), date);
+                            if (price <= maxPrice) {
+                                System.out.println(gh.getName() + " (" + price + "원)");
+                            }
+                        }
+                    }
+
+                    case 0 -> { return; }
+
+                    default -> System.out.println("잘못된 입력입니다.");
                 }
 
-                case 2 -> {
-                    System.out.print("최소 남은 인원수를 입력하세요: ");
-                    int min = scanner.nextInt();
-                    scanner.nextLine();
-                    guestHouses.stream()
-                        .filter(s -> {
-                            String[] tokens = s.split("/");
-                            int remaining = Integer.parseInt(tokens[2]);
-                            return remaining >= min;
-                        })
-                        .forEach(System.out::println);
-                }
-
-                case 3 -> {
-                    guestHouses.stream()
-                        .filter(s -> s.contains("/true/"))
-                        .forEach(System.out::println);
-                }
-
-                case 4 -> {
-                    guestHouses.forEach(System.out::println);
-                }
-
-                case 5 -> {
-                    System.out.print("최대 가격을 입력하세요: ");
-                    int maxPrice = scanner.nextInt();
-                    scanner.nextLine();
-                    System.out.print("요일을 입력하세요 (예: 금): ");
-                    String day = scanner.nextLine();
-                    guestHouses.stream()
-                        .filter(s -> {
-                            String[] tokens = s.split("/");
-                            int price = Integer.parseInt(tokens[4]);
-                            String dow = tokens[5];
-                            return price <= maxPrice && dow.equals(day);
-                        })
-                        .forEach(System.out::println);
-                }
-
-                case 0 -> { return; }
-
-                default -> System.out.println("잘못된 입력입니다.");
+            } catch (Exception e) {
+                System.out.println("❌ 오류: " + e.getMessage());
             }
         }
     }
+
     
 
     // ===================== 관리자 기능 구현 =====================
     public static void assignMembership() {
         try {
             gdao.assignCustomerGrades();
-            System.out.println("등급 부여 완료.");
+            System.out.println("✅ 회원 등급 부여 완료!");
         } catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		} 
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
     public static void registerGuestHouse() {
-    	try {
-    		System.out.println("추가할 게스트 하우스의 데이터를 입력하십시오.");
-    		int guestHouseId = scanner.nextInt();    		
-    		String guestHouseName = scanner.next();
-    		String guestHouseAddress = scanner.next();
-    		int guestHousePrice = scanner.nextInt();
-    		int guestHouseCapacity = scanner.nextInt();
-    		String guestHouseService = scanner.next();
-    		
-    		GuestHouse updateGH = new GuestHouse(guestHouseId, guestHouseName, guestHouseAddress, guestHousePrice, guestHouseCapacity, guestHouseService);
-    		
-    		gdao.registerGuestHouse(updateGH);
-		}
-    	 catch (DuplicateException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.println("[게스트하우스 등록]");
+
+            System.out.print("번호: ");
+            int num = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("이름: ");
+            String name = scanner.nextLine();
+
+            System.out.print("주소: ");
+            String address = scanner.nextLine();
+
+            System.out.print("가격: ");
+            int price = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("수용 인원: ");
+            int capacity = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("서비스 (party, breakfast 등): ");
+            String service = scanner.nextLine();
+
+            GuestHouse gh = new GuestHouse(num, name, address, price, capacity, service);
+            gdao.registerGuestHouse(gh);
+
+        } catch (DuplicateException | DMLException e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
     public static void updateGuestHouse() {
-    	try {
-    		System.out.println("수정할 게스트하우스의 아이디를 입력하십시오.");
-    		int guestHouseId = scanner.nextInt();
-    		
-    		System.out.println("게스트하우스를 수정할 데이터를 입력하십시오.");
-    		String guestHouseName = scanner.next();
-    		String guestHouseAddress = scanner.next();
-    		int guestHousePrice = scanner.nextInt();
-    		int guestHouseCapacity = scanner.nextInt();
-    		
-    		GuestHouse updateGH = new GuestHouse(guestHouseId, guestHouseName, guestHouseAddress, guestHousePrice, guestHouseCapacity, null);
-    		
-    		gdao.updateGuestHouse(updateGH);
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.println("[게스트하우스 수정]");
+
+            System.out.print("수정할 게스트하우스 번호: ");
+            int num = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("이름: ");
+            String name = scanner.nextLine();
+
+            System.out.print("주소: ");
+            String address = scanner.nextLine();
+
+            System.out.print("가격: ");
+            int price = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("수용 인원: ");
+            int capacity = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("서비스: ");
+            String service = scanner.nextLine();
+
+            GuestHouse gh = new GuestHouse(num, name, address, price, capacity, service);
+            gdao.updateGuestHouse(gh);
+
+        } catch (RecordNotFoundException | DMLException e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
     public static void deleteGuestHouse() {
-    	try {
-    		System.out.println("삭제할 게스트하우스의 아이디를 입력하십시오.");
-    		int guestHouseId = scanner.nextInt();
-    		gdao.deleteGuestHouse(guestHouseId);
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.print("삭제할 게스트하우스 번호: ");
+            int num = Integer.parseInt(scanner.nextLine());
+
+            gdao.deleteGuestHouse(num);
+            System.out.println("✅ 삭제 완료");
+
+        } catch (RecordNotFoundException | DMLException e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
     public static void reservationStats() {
-    	try {
-			System.out.println(gdao.getAllGHReservations().toString());
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.println("\n[게스트하우스별 예약 목록]");
+            Map<Integer, List<Reservation>> map = gdao.getAllGHReservations();
+
+            for (Map.Entry<Integer, List<Reservation>> entry : map.entrySet()) {
+                System.out.println("🟩 게스트하우스 번호: " + entry.getKey());
+                entry.getValue().forEach(System.out::println);
+            }
+
+        } catch (RecordNotFoundException | DMLException e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 
     public static void salesStats() {
-    	try {
-			System.out.println(gdao.getTotalSalesPerGuestHouse().toString());
-	    	System.out.println(gdao.getTop5GHByRevenue().toString());
-		}
-    	 catch (RecordNotFoundException | DMLException e) {
- 			System.out.println(e.getMessage());
- 		}
+        try {
+            System.out.println("\n[게스트하우스별 매출 등급]");
+            Map<String, Integer> map = gdao.getTotalSalesPerGuestHouse();
+            for (String name : map.keySet()) {
+                System.out.println("🏨 " + name + " → " + map.get(name) + "등급");
+            }
+
+            System.out.println("\n[Top 5 매출 게스트하우스]");
+            Map<String, GuestHouse> top5 = gdao.getTop5GHByRevenue();
+            for (String rank : top5.keySet()) {
+                System.out.println(rank + " → " + top5.get(rank));
+            }
+
+        } catch (RecordNotFoundException | DMLException e) {
+            System.out.println("❌ " + e.getMessage());
+        }
     }
 	
 	/**
 	 * 예약테이블을 5초마다 가져오는 작업을 수행
 	 */
-	@Override
-	public void run() {
-		while (true) {// 무한 루핑을 돌면서 작업을 하도록...
-			
-			// 쓰레드가 작업하는 코드를 작성....실시간으로 예약테이블의 정보를 가져와서
-			try {
-				
-				Thread.sleep(5000); //5초 마다
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+    @Override
+    public void run() {
+    	while (true) {
+    		try {
+    			List<Customer> customers = gdao.getAllCustomers();
+    			System.out.println("\n[5초마다 최신 예약 현황 출력]");
+    			for (Customer c : customers) {
+    				List<Reservation> resList = cdao.getReservation(c.getNum());
+    				if (!resList.isEmpty()) {
+    					System.out.println("고객: " + c.getName());
+    					for (Reservation r : resList) {
+    						System.out.println("  " + r);
+    					}
+    				}
+    			}
 
-	}
+    			Thread.sleep(5000); // 5초마다 반복
+
+    		} catch (Exception e) {
+    			System.out.println("❌ 예약 갱신 오류: " + e.getMessage());
+    		}
+    	}
+    }
+
+    
+//	@Override
+//	public void run() {
+//		while (true) {// 무한 루핑을 돌면서 작업을 하도록...
+//			
+//			// 쓰레드가 작업하는 코드를 작성....실시간으로 예약테이블의 정보를 가져와서
+//			try {
+//				
+//				Thread.sleep(5000); //5초 마다
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+//
+//	}
 }
