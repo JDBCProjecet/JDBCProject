@@ -20,9 +20,9 @@ public class GuestHouseTest implements Runnable {
     static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-//    	GuestHouseTest test = new GuestHouseTest();
-//		Thread t = new Thread(test);
-//		t.start();
+    	GuestHouseTest test = new GuestHouseTest();
+		Thread t = new Thread(test);
+		t.start();
         while (true) {
             System.out.println("\n=== 게스트하우스 예약 시스템 ===");
             System.out.println("1. 고객으로 접속");
