@@ -785,7 +785,6 @@ public class CustomerDAOImpl implements CustomerDAO{
 			if (date.getDayOfWeek() == DayOfWeek.FRIDAY || date.getDayOfWeek() == DayOfWeek.SATURDAY) {
 				price = price * 12 / 10;
 			
-				price = rs.getInt("gus_price");
 			}
 		} catch (SQLIntegrityConstraintViolationException e) {
 			throw new RecordNotFoundException("해당 게스트하우스가 존재하지 않습니다.");

@@ -192,7 +192,7 @@ public class GuestHouseTest implements Runnable {
             System.out.print("주소: ");
             String address = scanner.nextLine();
 
-            System.out.print("주민번호(######-#######): ");
+            System.out.print("생년월일(YYYY-MM-dd): ");
             String ssn = scanner.nextLine();
 
             System.out.print("성별(M/F): ");
@@ -201,10 +201,7 @@ public class GuestHouseTest implements Runnable {
             System.out.print("전화번호(010-xxxx-xxxx): ");
             String phone = scanner.nextLine();
 
-            System.out.print("등급(BRONZE/GOLD/SILVER): ");
-            String grade = scanner.nextLine();
-
-            Customer c = new Customer(num, name, address, ssn, gender, phone, grade);
+            Customer c = new Customer(num, name, address, ssn, gender, phone);
             cdao.registerCustomer(c);
         } catch (Exception e) {
             System.out.println("❌ " + e.getMessage());
@@ -223,7 +220,7 @@ public class GuestHouseTest implements Runnable {
             System.out.print("주소: ");
             String address = scanner.nextLine();
 
-            System.out.print("주민번호: ");
+            System.out.print("생년월일(YYYY-MM-dd): ");
             String ssn = scanner.nextLine();
 
             System.out.print("성별(M/F): ");
@@ -232,10 +229,7 @@ public class GuestHouseTest implements Runnable {
             System.out.print("전화번호: ");
             String phone = scanner.nextLine();
 
-            System.out.print("등급: ");
-            String grade = scanner.nextLine();
-
-            Customer c = new Customer(num, name, address, ssn, gender, phone, grade);
+            Customer c = new Customer(num, name, address, ssn, gender, phone);
             cdao.updateCustomer(c);
         } catch (Exception e) {
             System.out.println("❌ " + e.getMessage());
@@ -381,8 +375,10 @@ public class GuestHouseTest implements Runnable {
                     }
 
                     case 3 -> { // 특별룸 조회: 서비스 컬럼 기준
-                        List<GuestHouse> special = cdao.getGuestHouses("party");
-                        special.addAll(cdao.getGuestHouses("breakfast"));
+                    	System.out.print("서비스 입력 (party,breakfast): ");
+                        String service = scanner.nextLine();
+                        List<GuestHouse> special = cdao.getGuestHouses(service);
+                        special.addAll(cdao.getGuestHouses(service));
                         System.out.println("[특별 서비스 제공 게스트하우스]");
                         special.forEach(System.out::println);
                     }
