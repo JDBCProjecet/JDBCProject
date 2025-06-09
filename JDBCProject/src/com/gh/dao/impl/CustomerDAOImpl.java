@@ -289,14 +289,13 @@ public class CustomerDAOImpl implements CustomerDAO{
 		try {
 		    conn = getConnect();
 		    if (isExist(customer.getNum(), conn)) { // 추가하려는 회원번호가 맞다면
-		    	String query = "UPDATE customer SET cus_name = ?, cus_address = ?, cus_ssn = ?, cus_gender = ?, cus_phone = ?, cus_grade = ? WHERE cus_num = ?";
+		    	String query = "UPDATE customer SET cus_name = ?, cus_address = ?, cus_ssn = ?, cus_gender = ?, cus_phone = ? WHERE cus_num = ?";
 		        ps = conn.prepareStatement(query);
 		        ps.setString(1, customer.getName());
 		        ps.setString(2, customer.getAddress());
 		        ps.setString(3, customer.getSsn());
 		        ps.setString(4, String.valueOf(customer.getGender())); 
 		        ps.setString(5, customer.getPhone());
-		        ps.setString(6, customer.getGrade());
 		        ps.setInt(7, customer.getNum());
 		        System.out.println(ps.executeUpdate() + "업데이트 성공!!!");
 		    }else {
